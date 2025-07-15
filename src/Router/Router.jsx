@@ -17,6 +17,7 @@ import PayRoll from "../Page/Dashborde/Admin/PayRoll";
 import MakeAdmin from "../Page/Dashborde/Admin/MakeAdmin";
 import Forbbiden from "../Forbidden/Forbbiden";
 import AdminRoute from "../Page/Auth/AdminRoute";
+import HRRoute from "../Page/Auth/HRPrivateRoute";
 
 export const router = createBrowserRouter([
   {
@@ -53,15 +54,17 @@ export const router = createBrowserRouter([
       },
       {
         path: "employList",
-        element: <EmployeeList />,
+        element: <EmployeeList />
+
+        // <HRRoute></HRRoute>
       },
       {
-        path: "employList/details/:id", // 🛠️ Nested path, but separate for flexibility
-        element: <EmployDetails />,
+        path: "employList/details/:id",
+        element: <HRRoute><EmployDetails /></HRRoute>
       },
       {
         path: 'progress',
-        element: <Progress></Progress>
+        element: <HRRoute><Progress></Progress></HRRoute>
       },
       {
         path: 'makeAdmin',

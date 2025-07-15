@@ -3,10 +3,13 @@ import UseAxios from '../../../Hooks/UseAxios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import moment from 'moment';
 import Swal from 'sweetalert2';
+import UseAuth from '../../../Hooks/UseAuth';
+
 
 const MakeAdmin = () => {
   const axiosSecure = UseAxios();
   const queryClient = useQueryClient();
+  const { user: currentUser } = UseAuth();
   const [searchText, setSearchText] = useState('');
 
   const { data: users = [], isLoading, isError, error } = useQuery({
@@ -26,8 +29,16 @@ const MakeAdmin = () => {
     },
   });
 
-  // Role change with Swal confirmation
-  const handleRoleChange = async (id, currentRole, name) => {
+  const handleRoleChange = async (id, currentRole, name, email) => {
+    // 🔒 Prevent changing own role
+    if (currentUser?.email === email) {
+      return Swal.fire({
+        icon: 'warning',
+        title: "Action Blocked",
+        text: "You can't change your own role!",
+      });
+    }
+
     let newRole = '';
     if (currentRole.toLowerCase() === 'admin') {
       newRole = 'HR';
@@ -52,18 +63,10 @@ const MakeAdmin = () => {
     if (result.isConfirmed) {
       try {
         await updateRole({ id, role: newRole });
-        Swal.fire(
-          'Success!',
-          `${name} has been ${actionText}.`,
-          'success'
-        );
+        Swal.fire('Success!', `${name} has been ${actionText}.`, 'success');
       } catch (err) {
         console.log(err);
-        Swal.fire(
-          'Error!',
-          'Failed to update role. Please try again.',
-          'error'
-        );
+        Swal.fire('Error!', 'Failed to update role. Please try again.', 'error');
       }
     }
   };
@@ -138,11 +141,15 @@ const MakeAdmin = () => {
                   <td className="px-6 py-4 border-b text-center">
                     {user.isVerified ? (
                       <button
-                        onClick={() => handleRoleChange(user._id, user.role, user.name)}
+                        onClick={() =>
+                          handleRoleChange(user._id, user.role, user.name, user.email)
+                        }
                         className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
                         disabled={isUpdating}
                       >
-                        {user.role.toLowerCase() === 'admin' ? 'Remove Admin' : 'Make Admin'}
+                        {user.role.toLowerCase() === 'admin'
+                          ? 'Remove Admin'
+                          : 'Make Admin'}
                       </button>
                     ) : (
                       <span className="text-sm text-gray-400">Not Verified</span>

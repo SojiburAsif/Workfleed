@@ -51,9 +51,9 @@ const Progress = () => {
       .catch(err => console.error('Error loading works:', err));
   }, [axiosSecure]);
 
-  // Filter applied হলে ডেটা লোড করা (মাস অথবা ইমেইল অথবা উভয়ই)
+
   useEffect(() => {
-    // কোনো filter না থাকলে সব data দেখাবে
+  
     if (!selectedMonth && !selectedEmail) {
       axiosSecure.get('/works')
         .then(res => setRecords(res.data))
