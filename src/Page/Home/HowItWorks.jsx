@@ -28,9 +28,9 @@ const HowItWorks = () => {
   return (
     <section className="bg-gray-50 py-16 bg-gradient-to-b from-white via-red-50 to-white">
       <div className="max-w-6xl mx-auto flex flex-col-reverse md:flex-row items-center gap-12">
-        
+
         {/* Left: Steps */}
-        <motion.div 
+        <motion.div
           className="flex-1 grid grid-cols-1 gap-8"
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -38,7 +38,7 @@ const HowItWorks = () => {
         >
           <h2 className="text-4xl font-bold text-gray-800 mb-4">How It Works</h2>
           {steps.map((step, index) => (
-            <motion.div 
+            <motion.div
               key={step.id}
               className="bg-white rounded-2xl shadow-lg p-6 flex items-start gap-4 hover:shadow-red-200 transition"
               initial={{ opacity: 0, y: 30 }}
@@ -61,8 +61,13 @@ const HowItWorks = () => {
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <img src={howItWorksImg} alt="Employee Workflow" className="w-full max-w-md mx-auto drop-shadow-lg" />
+          <img
+            src={howItWorksImg}
+            alt="Employee Workflow"
+            className="w-full max-w-md h-[350px] object-cover rounded-xl mx-auto drop-shadow-lg"
+          />
         </motion.div>
+
 
       </div>
     </section>

@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import { useQuery } from '@tanstack/react-query';
 import UseAxios from '../../../Hooks/UseAxios';
 import UseAuth from '../../../Hooks/UseAuth';
-import Loading from '../../Shared/Loading';
+import LoadingCard from '../../Shared/LoadingCard';
 
 const WorkSheet = () => {
   const [task, setTask] = useState('Sales');
@@ -98,7 +98,7 @@ const WorkSheet = () => {
       });
   };
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <LoadingCard />;
 
   return (
     <div className="p-4 mx-auto ">

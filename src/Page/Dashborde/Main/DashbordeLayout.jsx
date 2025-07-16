@@ -11,6 +11,9 @@ const DashboardLayout = () => {
   const { role: rawRole } = useUserRole();
   const role = rawRole?.toLowerCase(); // Normalize: 'admin', 'hr', 'employee'
 
+  const linkClass = ({ isActive }) =>
+    `flex items-center gap-2 ${isActive ? 'font-bold text-red-700' : 'text-red-500'}`;
+
   return (
     <div className="drawer lg:drawer-open">
       <input id="dashboard-drawer" type="checkbox" className="drawer-toggle" />
@@ -32,9 +35,7 @@ const DashboardLayout = () => {
 
           {/* Shared - All Users */}
           <li>
-            <NavLink to="/dashboard" className={({ isActive }) =>
-              `flex items-center gap-2 ${isActive ? 'font-bold' : ''}`
-            }>
+            <NavLink to="/dashboard" className={linkClass}>
               <FaHome /> Dashboard Home
             </NavLink>
           </li>
@@ -42,18 +43,14 @@ const DashboardLayout = () => {
           {/* Employee Only */}
           {role === 'admin' && (
             <>
-              <li className="menu-title mt-4 text-blue-600">Employee</li>
+              <li className="menu-title mt-4 text-red-500">Employee</li>
               <li>
-                <NavLink to="/dashboard/work-sheet" className={({ isActive }) =>
-                  `flex items-center gap-2 ${isActive ? 'font-bold text-blue-600' : 'text-blue-600'}`
-                }>
+                <NavLink to="/dashboard/work-sheet" className={linkClass}>
                   <FaTasks /> Work Sheet
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/dashboard/payment-history" className={({ isActive }) =>
-                  `flex items-center gap-2 ${isActive ? 'font-bold text-blue-600' : 'text-blue-600'}`
-                }>
+                <NavLink to="/dashboard/payment-history" className={linkClass}>
                   <FaFileInvoiceDollar /> Payment History
                 </NavLink>
               </li>
@@ -63,18 +60,14 @@ const DashboardLayout = () => {
           {/* HR Only */}
           {role === 'admin' && (
             <>
-              <li className="menu-title mt-6 text-green-600">HR</li>
+              <li className="menu-title mt-6 text-red-500">HR</li>
               <li>
-                <NavLink to="/dashboard/employList" className={({ isActive }) =>
-                  `flex items-center gap-2 ${isActive ? 'font-bold text-green-600' : 'text-green-600'}`
-                }>
+                <NavLink to="/dashboard/employList" className={linkClass}>
                   <FaUserTie /> Employee List
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/dashboard/progress" className={({ isActive }) =>
-                  `flex items-center gap-2 ${isActive ? 'font-bold text-green-600' : 'text-green-600'}`
-                }>
+                <NavLink to="/dashboard/progress" className={linkClass}>
                   <FaUsersCog /> Progress
                 </NavLink>
               </li>
@@ -84,25 +77,19 @@ const DashboardLayout = () => {
           {/* Admin Only */}
           {role === 'admin' && (
             <>
-              <li className="menu-title mt-6 text-red-600">Admin</li>
+              <li className="menu-title mt-6 text-red-500">Admin</li>
               <li>
-                <NavLink to="/dashboard/makeAdmin" className={({ isActive }) =>
-                  `flex items-center gap-2 ${isActive ? 'font-bold text-red-600' : 'text-red-600'}`
-                }>
+                <NavLink to="/dashboard/makeAdmin" className={linkClass}>
                   <FaUserShield /> Make Admin
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/dashboard/allEmployeeList" className={({ isActive }) =>
-                  `flex items-center gap-2 ${isActive ? 'font-bold text-red-600' : 'text-red-600'}`
-                }>
+                <NavLink to="/dashboard/allEmployeeList" className={linkClass}>
                   <FaUsersCog /> All Employee List
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/dashboard/payroll" className={({ isActive }) =>
-                  `flex items-center gap-2 ${isActive ? 'font-bold text-red-600' : 'text-red-600'}`
-                }>
+                <NavLink to="/dashboard/payroll" className={linkClass}>
                   <FaFileInvoiceDollar /> Payroll
                 </NavLink>
               </li>
@@ -111,9 +98,7 @@ const DashboardLayout = () => {
 
           {/* Shared - All Users */}
           <li className="mt-6">
-            <NavLink to="/dashboard/contact-us" className={({ isActive }) =>
-              `flex items-center gap-2 ${isActive ? 'font-bold text-gray-700' : 'text-gray-700'}`
-            }>
+            <NavLink to="/dashboard/contact-us" className={linkClass}>
               <FaUser /> Contact Us
             </NavLink>
           </li>

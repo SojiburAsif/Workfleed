@@ -32,8 +32,7 @@ const EmployDetails = () => {
   // Fetch payroll history
   useEffect(() => {
     if (!user?.email) return;
-    axiosSecure
-      .get(`/payroll?email=${user.email}`)
+    axiosSecure.get(`/payroll?userId=${user._id}`)
       .then(res => {
         setRawPayments(res.data);
         const data = res.data.map(p => ({
