@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import moment from 'moment';
 import Swal from 'sweetalert2';
 import UseAuth from '../../../Hooks/UseAuth';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaUserShield } from 'react-icons/fa';
 import LoadingCard from '../../Shared/LoadingCard';
 
 const MakeAdmin = () => {
@@ -13,7 +13,6 @@ const MakeAdmin = () => {
   const { user: currentUser } = UseAuth();
   const [searchText, setSearchText] = useState('');
 
-  // Fetch all users
   const { data: users = [], isLoading, isError, error } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
@@ -22,7 +21,6 @@ const MakeAdmin = () => {
     },
   });
 
-  // Update role
   const { mutateAsync: updateRole, isLoading: isUpdating } = useMutation({
     mutationFn: async ({ id, role }) => {
       return await axiosSecure.patch(`/users/${id}/role`, { role });
@@ -75,19 +73,12 @@ const MakeAdmin = () => {
       );
     });
 
-  if (isLoading) {
-    return <LoadingCard></LoadingCard>
-  }
-
-  if (isError) {
-    return (
-      <p className="text-center mt-10 text-red-600 text-lg">{error.message}</p>
-    );
-  }
+  if (isLoading) return <LoadingCard />;
+  if (isError) return <p className="text-center mt-10 text-red-600 text-lg">{error.message}</p>;
 
   return (
-    <section className="w-full mx-auto p-8 ">
-      <h1 className="text-3xl font-bold mb-8 text-center text-red-600 drop-shadow">
+    <section className="w-full mx-auto p-4 sm:p-8">
+      <h1 className="text-3xl font-bold mb-6 text-center text-red-600 drop-shadow">
         Admin Panel – Promote / Remove Admin
       </h1>
 
@@ -105,10 +96,9 @@ const MakeAdmin = () => {
         </div>
       </div>
 
-
-      {/* Table */}
-      <div className="overflow-x-auto bborder border-gray-200  rounded-xs shadow-sm">
-        <table className="min-w-full text-sm text-left divide-y divide-gray-200  overflow-hidden">
+      {/* Desktop Table */}
+      <div className="hidden sm:block overflow-x-auto border rounded shadow-sm">
+        <table className="min-w-full text-sm text-left divide-y divide-gray-200">
           <thead className="bg-red-100 text-red-700 text-sm font-semibold uppercase">
             <tr>
               <th className="px-4 py-3">Photo</th>
@@ -120,63 +110,102 @@ const MakeAdmin = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-100">
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map(user => {
-                const isAdmin = user.role.toLowerCase() === 'admin';
-                const roleLabel =
-                  user.role.charAt(0).toUpperCase() + user.role.slice(1);
+            {filteredUsers.map(user => {
+              const isAdmin = user.role.toLowerCase() === 'admin';
+              const roleLabel = user.role.charAt(0).toUpperCase() + user.role.slice(1);
 
-                return (
-                  <tr key={user._id} className="hover:bg-red-50">
-                    <td className="px-4 py-3">
-                      <img
-                        src={user.photo || 'https://via.placeholder.com/40'}
-                        alt={user.name || 'User'}
-                        className="w-10 h-10 rounded-full object-cover border"
-                      />
-                    </td>
-                    <td className="px-6 py-3 font-medium">{user.name || 'N/A'}</td>
-                    <td className="px-6 py-3">{user.email || 'N/A'}</td>
-                    <td className="px-4 py-3">
-                      <span className="badge badge-outline badge-secondary">
-                        {roleLabel}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {user.registeredAt
-                        ? moment(user.registeredAt).format('MMM D, YYYY')
-                        : 'N/A'}
-                    </td>
-                    <td className="px-6 py-3 text-center">
-                      {user.isVerified ? (
-                        <button
-                          onClick={() =>
-                            handleRoleChange(user._id, user.role, user.name, user.email)
-                          }
-                          className={`px-4 py-2 rounded-md transition disabled:opacity-50 ${isAdmin
-                              ? 'bg-gray-500 hover:bg-gray-600 text-white'
-                              : 'bg-red-600 hover:bg-red-700 text-white'
-                            }`}
-                          disabled={isUpdating}
-                        >
-                          {isAdmin ? 'Remove Admin' : 'Make Admin'}
-                        </button>
-                      ) : (
-                        <span className="text-sm text-gray-400">Not Verified</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan="6" className="text-center py-6 text-gray-500">
-                  No eligible HR or Admin users found.
-                </td>
-              </tr>
-            )}
+              return (
+                <tr key={user._id} className="hover:bg-red-50">
+                  <td className="px-4 py-3">
+                    <img
+                      src={user.photo || 'https://via.placeholder.com/40'}
+                      alt={user.name || 'User'}
+                      className="w-10 h-10 rounded-full object-cover border"
+                    />
+                  </td>
+                  <td className="px-6 py-3 font-medium">{user.name || 'N/A'}</td>
+                  <td className="px-6 py-3">{user.email || 'N/A'}</td>
+                  <td className="px-4 py-3">
+                    <span className="badge badge-outline badge-secondary">{roleLabel}</span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {user.registeredAt ? moment(user.registeredAt).format('MMM D, YYYY') : 'N/A'}
+                  </td>
+                  <td className="px-6 py-3 text-center">
+                    {user.isVerified ? (
+                      <button
+                        onClick={() =>
+                          handleRoleChange(user._id, user.role, user.name, user.email)
+                        }
+                        className={`px-4 py-2 rounded-md transition disabled:opacity-50 ${
+                          isAdmin
+                            ? 'bg-gray-500 hover:bg-gray-600 text-white'
+                            : 'bg-red-600 hover:bg-red-700 text-white'
+                        }`}
+                        disabled={isUpdating}
+                      >
+                        {isAdmin ? 'Remove Admin' : 'Make Admin'}
+                      </button>
+                    ) : (
+                      <span className="text-sm text-gray-400">Not Verified</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="sm:hidden space-y-4 mt-6">
+        {filteredUsers.map(user => {
+          const isAdmin = user.role.toLowerCase() === 'admin';
+          const roleLabel = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+
+          return (
+            <div
+              key={user._id}
+              className="bg-white p-4 rounded-lg shadow border border-gray-200"
+            >
+              <div className="flex items-center gap-4 mb-3">
+                <img
+                  src={user.photo || 'https://via.placeholder.com/40'}
+                  alt={user.name || 'User'}
+                  className="w-14 h-14 rounded-full object-cover border"
+                />
+                <div>
+                  <h3 className="text-lg font-semibold text-red-600">{user.name || 'N/A'}</h3>
+                  <p className="text-sm text-gray-700">{user.email || 'N/A'}</p>
+                </div>
+              </div>
+              <p className="text-sm mb-1">
+                <strong>Role:</strong> {roleLabel}
+              </p>
+              <p className="text-sm mb-2">
+                <strong>Joined:</strong>{' '}
+                {user.registeredAt ? moment(user.registeredAt).format('MMM D, YYYY') : 'N/A'}
+              </p>
+              {user.isVerified ? (
+                <button
+                  onClick={() =>
+                    handleRoleChange(user._id, user.role, user.name, user.email)
+                  }
+                  className={`w-full py-2 mt-2 rounded-md text-white text-sm font-semibold transition ${
+                    isAdmin
+                      ? 'bg-gray-500 hover:bg-gray-600'
+                      : 'bg-red-600 hover:bg-red-700'
+                  }`}
+                  disabled={isUpdating}
+                >
+                  {isAdmin ? 'Remove Admin' : 'Make Admin'}
+                </button>
+              ) : (
+                <p className="text-sm text-gray-400 mt-2">Not Verified</p>
+              )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
