@@ -8,7 +8,7 @@ import Error from "../Error/Error";
 import PrivateRouter from "../Page/Auth/PrivatRouter";
 import DashboardLayout from "../Page/Dashborde/Main/DashbordeLayout";
 import WorkSheet from "../Page/Dashborde/Employe/WorkSheet";
-import PaymentPage from "../Page/Dashborde/Admin/Payment";
+
 import EmployeeList from "../Page/Dashborde/HR/EmployList";
 import EmployDetails from "../Page/Dashborde/HR/EmpoltDeatils"; // spelling fixed
 import Progress from "../Page/Dashborde/HR/Progress";
@@ -19,6 +19,8 @@ import Forbbiden from "../Forbidden/Forbbiden";
 import AdminRoute from "../Page/Auth/AdminRoute";
 import HRRoute from "../Page/Auth/HRPrivateRoute";
 import Contact from "../Page/Dashborde/Contact/Contact";
+import PaymentPage from "../Page/Dashborde/Admin/Payment";
+import PayEmploy from "../Page/Dashborde/Employe/PayEmploy";
 
 
 export const router = createBrowserRouter([
@@ -50,10 +52,10 @@ export const router = createBrowserRouter([
         path: "work-sheet",
         element: <WorkSheet />,
       },
-      {
-        path: "payment-history",
-        element: <PaymentPage />,
-      },
+     {
+      path: 'payment-history',
+      element: <PayEmploy></PayEmploy>
+     },
       {
         path: "employList",
         element: <EmployeeList />

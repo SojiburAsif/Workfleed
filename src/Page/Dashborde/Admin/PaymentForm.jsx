@@ -1,71 +1,115 @@
 import React, { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import UseAxios from '../../../Hooks/UseAxios';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router';
 
-const PaymentForm = ({ amount, onSuccessfulPayment }) => {
+const PaymentForm = ({ salary, payrollId, clientSecret }) => {
   const stripe = useStripe();
   const elements = useElements();
+  const axiosSecure = UseAxios();
+  const navigate = useNavigate();
 
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!stripe || !elements) return;
-
-    const card = elements.getElement(CardElement);
-    if (!card) return;
-
+    setSuccess('');
     setProcessing(true);
 
-    // Create payment method
-    const { error: createError, paymentMethod } = await stripe.createPaymentMethod({
-      type: 'card',
-      card,
-    });
-
-    if (createError) {
-      setError(createError.message);
+    if (!stripe || !elements) {
+      setError('Stripe has not loaded yet.');
       setProcessing(false);
       return;
     }
 
-    // Normally here you'd send paymentMethod.id & amount to your backend to create payment intent and confirm payment
-
-    // For demo, we simulate success
-    setTimeout(() => {
+    const card = elements.getElement(CardElement);
+    if (!card) {
+      setError('Card element not found.');
       setProcessing(false);
-      onSuccessfulPayment && onSuccessfulPayment(paymentMethod.id);
-    }, 1500);
+      return;
+    }
+
+    try {
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card,
+          billing_details: {
+            name: 'Md Asif', // চাইলে ডাইনামিক করো
+            email: 'asif@example.com',
+          },
+        },
+      });
+
+      if (result.error) {
+        setError(result.error.message);
+      } else if (result.paymentIntent.status === 'succeeded') {
+        const transactionId = result.paymentIntent.id;
+
+        try {
+          const res = await axiosSecure.patch(`/payroll/pay/${payrollId}`, {
+            transactionId,
+          });
+
+          if (res.data?.paid) {
+            setSuccess('✅ Payment successful and payroll updated!');
+
+            Swal.fire({
+              icon: 'success',
+              title: 'Payment Successful',
+              html: `<p>Your payment has been processed.</p>
+                     <p><b>Transaction ID:</b><br/><code>${transactionId}</code></p>`,
+              confirmButtonColor: '#dc2626',
+            }).then(() => {
+              navigate('/dashboard/payroll');
+            });
+          } else {
+            setError('⚠️ Payment succeeded but payroll update failed.');
+          }
+        } catch (updateError) {
+          console.error(updateError);
+          setError('⚠️ Payment succeeded but failed to update server.');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setError('❌ Unexpected error occurred.');
+    }
+
+    setProcessing(false);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 bg-white rounded shadow space-y-4">
+    <form onSubmit={handleSubmit} className="mt-6 max-w-xl mx-auto p-6 bg-white rounded-lg border border-gray-200">
       <CardElement
         options={{
           style: {
             base: {
               fontSize: '16px',
               color: '#32325d',
-              '::placeholder': {
-                color: '#a0aec0',
-              },
+              '::placeholder': { color: '#a0aec0' },
+              fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+              padding: '10px',
             },
-            invalid: {
-              color: '#fa755a',
-            },
+            invalid: { color: '#fa755a' },
           },
         }}
       />
-      {error && <p className="text-red-600">{error}</p>}
+
+      {error && <p className="text-red-600 mt-3 text-center font-medium">{error}</p>}
+      {success && <p className="text-green-600 mt-3 text-center font-medium">{success}</p>}
+
       <button
         type="submit"
         disabled={!stripe || processing}
-        className={`w-full py-2 rounded text-white font-semibold ${
-          processing ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+        className={`mt-6 w-full py-3 rounded-md text-white font-semibold transition-colors duration-300 ${
+          processing ? 'bg-red-300 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
         }`}
       >
-        {processing ? 'Processing...' : `Pay $${amount}`}
+        {processing ? 'Processing...' : `Pay ৳${salary}`}
       </button>
     </form>
   );
