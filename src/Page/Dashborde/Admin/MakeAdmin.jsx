@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import moment from 'moment';
 import Swal from 'sweetalert2';
 import UseAuth from '../../../Hooks/UseAuth';
-
+import { FaSearch } from 'react-icons/fa';
+import LoadingCard from '../../Shared/LoadingCard';
 
 const MakeAdmin = () => {
   const axiosSecure = UseAxios();
@@ -12,6 +13,7 @@ const MakeAdmin = () => {
   const { user: currentUser } = UseAuth();
   const [searchText, setSearchText] = useState('');
 
+  // Fetch all users
   const { data: users = [], isLoading, isError, error } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
@@ -20,6 +22,7 @@ const MakeAdmin = () => {
     },
   });
 
+  // Update role
   const { mutateAsync: updateRole, isLoading: isUpdating } = useMutation({
     mutationFn: async ({ id, role }) => {
       return await axiosSecure.patch(`/users/${id}/role`, { role });
@@ -30,7 +33,6 @@ const MakeAdmin = () => {
   });
 
   const handleRoleChange = async (id, currentRole, name, email) => {
-    // 🔒 Prevent changing own role
     if (currentUser?.email === email) {
       return Swal.fire({
         icon: 'warning',
@@ -39,17 +41,9 @@ const MakeAdmin = () => {
       });
     }
 
-    let newRole = '';
-    if (currentRole.toLowerCase() === 'admin') {
-      newRole = 'HR';
-    } else if (currentRole.toLowerCase() === 'hr') {
-      newRole = 'admin';
-    } else {
-      return;
-    }
-
-    const actionText =
-      newRole === 'admin' ? 'promote to Admin' : 'demote to HR';
+    const isAdmin = currentRole.toLowerCase() === 'admin';
+    const newRole = isAdmin ? 'HR' : 'admin';
+    const actionText = isAdmin ? 'demote to HR' : 'promote to Admin';
 
     const result = await Swal.fire({
       title: `Are you sure?`,
@@ -64,99 +58,116 @@ const MakeAdmin = () => {
       try {
         await updateRole({ id, role: newRole });
         Swal.fire('Success!', `${name} has been ${actionText}.`, 'success');
-      } catch (err) {
-        console.log(err);
+      } catch {
         Swal.fire('Error!', 'Failed to update role. Please try again.', 'error');
       }
     }
   };
 
   const filteredUsers = users
-    .filter(user => ['admin', 'hr'].includes(user.role?.toLowerCase()))
-    .filter(user => !user.fired)
-    .filter(user => {
-      const text = searchText.toLowerCase();
+    .filter(u => ['admin', 'hr'].includes(u.role?.toLowerCase()))
+    .filter(u => !u.fired)
+    .filter(u => {
+      const txt = searchText.toLowerCase();
       return (
-        user.name?.toLowerCase().includes(text) ||
-        user.email?.toLowerCase().includes(text)
+        u.name?.toLowerCase().includes(txt) ||
+        u.email?.toLowerCase().includes(txt)
       );
     });
 
-  if (isLoading)
-    return <p className="text-center mt-10 text-lg text-blue-500">Loading users...</p>;
+  if (isLoading) {
+    return <LoadingCard></LoadingCard>
+  }
 
-  if (isError)
-    return <p className="text-center mt-10 text-red-500 text-lg">{error.message}</p>;
+  if (isError) {
+    return (
+      <p className="text-center mt-10 text-red-600 text-lg">{error.message}</p>
+    );
+  }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto bg-white rounded-lg">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
+    <section className="w-full mx-auto p-8 ">
+      <h1 className="text-3xl font-bold mb-8 text-center text-red-600 drop-shadow">
         Admin Panel – Promote / Remove Admin
       </h1>
 
+      {/* Search */}
       <div className="mb-6 flex justify-center">
-        <input
-          type="text"
-          placeholder="🔍 Search by name or email"
-          value={searchText}
-          onChange={e => setSearchText(e.target.value)}
-          className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="relative w-full max-w-xl">
+          <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
+          <input
+            type="text"
+            placeholder="Search by name or email…"
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
+            className="w-full pl-12 pr-5 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm"
+          />
+        </div>
       </div>
 
-      <div className="overflow-x-auto rounded-md border">
-        <table className="min-w-full text-sm text-left text-gray-700">
-          <thead className="bg-gray-100 text-gray-700 uppercase tracking-wider">
+
+      {/* Table */}
+      <div className="overflow-x-auto bborder border-gray-200  rounded-xs shadow-sm">
+        <table className="min-w-full text-sm text-left divide-y divide-gray-200  overflow-hidden">
+          <thead className="bg-red-100 text-red-700 text-sm font-semibold uppercase">
             <tr>
-              <th className="px-4 py-3 border-b">Photo</th>
-              <th className="px-6 py-3 border-b">Name</th>
-              <th className="px-6 py-3 border-b">Email</th>
-              <th className="px-4 py-3 border-b">Role</th>
-              <th className="px-4 py-3 border-b">Joined</th>
-              <th className="px-6 py-3 border-b text-center">Action</th>
+              <th className="px-4 py-3">Photo</th>
+              <th className="px-6 py-3">Name</th>
+              <th className="px-6 py-3">Email</th>
+              <th className="px-4 py-3">Role</th>
+              <th className="px-4 py-3">Joined</th>
+              <th className="px-6 py-3 text-center">Action</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-white divide-y divide-gray-100">
             {filteredUsers.length > 0 ? (
-              filteredUsers.map(user => (
-                <tr
-                  key={user._id}
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <td className="px-4 py-3 border-b">
-                    <img
-                      src={user.photo || 'https://via.placeholder.com/40'}
-                      alt={user.name || 'User'}
-                      className="w-10 h-10 rounded-full object-cover border"
-                    />
-                  </td>
-                  <td className="px-6 py-4 border-b font-semibold">{user.name || 'N/A'}</td>
-                  <td className="px-6 py-4 border-b">{user.email || 'N/A'}</td>
-                  <td className="px-4 py-4 border-b font-bold uppercase">{user.role}</td>
-                  <td className="px-4 py-4 border-b">
-                    {user.registeredAt
-                      ? moment(user.registeredAt).format('MMM D, YYYY')
-                      : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 border-b text-center">
-                    {user.isVerified ? (
-                      <button
-                        onClick={() =>
-                          handleRoleChange(user._id, user.role, user.name, user.email)
-                        }
-                        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
-                        disabled={isUpdating}
-                      >
-                        {user.role.toLowerCase() === 'admin'
-                          ? 'Remove Admin'
-                          : 'Make Admin'}
-                      </button>
-                    ) : (
-                      <span className="text-sm text-gray-400">Not Verified</span>
-                    )}
-                  </td>
-                </tr>
-              ))
+              filteredUsers.map(user => {
+                const isAdmin = user.role.toLowerCase() === 'admin';
+                const roleLabel =
+                  user.role.charAt(0).toUpperCase() + user.role.slice(1);
+
+                return (
+                  <tr key={user._id} className="hover:bg-red-50">
+                    <td className="px-4 py-3">
+                      <img
+                        src={user.photo || 'https://via.placeholder.com/40'}
+                        alt={user.name || 'User'}
+                        className="w-10 h-10 rounded-full object-cover border"
+                      />
+                    </td>
+                    <td className="px-6 py-3 font-medium">{user.name || 'N/A'}</td>
+                    <td className="px-6 py-3">{user.email || 'N/A'}</td>
+                    <td className="px-4 py-3">
+                      <span className="badge badge-outline badge-secondary">
+                        {roleLabel}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {user.registeredAt
+                        ? moment(user.registeredAt).format('MMM D, YYYY')
+                        : 'N/A'}
+                    </td>
+                    <td className="px-6 py-3 text-center">
+                      {user.isVerified ? (
+                        <button
+                          onClick={() =>
+                            handleRoleChange(user._id, user.role, user.name, user.email)
+                          }
+                          className={`px-4 py-2 rounded-md transition disabled:opacity-50 ${isAdmin
+                              ? 'bg-gray-500 hover:bg-gray-600 text-white'
+                              : 'bg-red-600 hover:bg-red-700 text-white'
+                            }`}
+                          disabled={isUpdating}
+                        >
+                          {isAdmin ? 'Remove Admin' : 'Make Admin'}
+                        </button>
+                      ) : (
+                        <span className="text-sm text-gray-400">Not Verified</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan="6" className="text-center py-6 text-gray-500">
@@ -167,7 +178,7 @@ const MakeAdmin = () => {
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   );
 };
 

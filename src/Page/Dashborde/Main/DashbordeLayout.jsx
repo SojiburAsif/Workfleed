@@ -40,7 +40,7 @@ const DashboardLayout = () => {
           </li>
 
           {/* Employee Only */}
-          {role === 'employee' && (
+          {role === 'admin' && (
             <>
               <li className="menu-title mt-4 text-blue-600">Employee</li>
               <li>
@@ -61,7 +61,7 @@ const DashboardLayout = () => {
           )}
 
           {/* HR Only */}
-          {role === 'hr' && (
+          {role === 'admin' && (
             <>
               <li className="menu-title mt-6 text-green-600">HR</li>
               <li>

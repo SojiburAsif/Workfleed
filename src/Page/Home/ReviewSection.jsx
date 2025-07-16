@@ -90,7 +90,7 @@ const ReviewSection = () => {
                   <FaStar key={i} />
                 ))}
               </div>
-              <p className="text-gray-600 text-sm mb-4 italic">“ {review.content} ”</p>
+              <p className="text-gray-600 text-sm mb-4 ">“ {review.content} ”</p>
               <p className="text-xs text-gray-500">
                 {review.date} • {review.name}
               </p>

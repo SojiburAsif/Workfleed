@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { FaUserTie, FaCalendarAlt, FaClock } from 'react-icons/fa';
 import UseAxios from '../../../Hooks/UseAxios';
+import PRLoading from '../../Shared/PRLoading';
+
 
 const Progress = () => {
   const axiosSecure = UseAxios();
@@ -9,9 +11,10 @@ const Progress = () => {
   const [employees, setEmployees] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
+  const [loading, setLoading] = useState(true); // ✅ Loading state added
 
-  // মাসের নাম ও তার ভ্যালু (MM ফরম্যাটে)
-  const months = [
+  // Months list
+  const months = useMemo(() => [
     { name: 'January', value: '01' },
     { name: 'February', value: '02' },
     { name: 'March', value: '03' },
@@ -24,15 +27,15 @@ const Progress = () => {
     { name: 'October', value: '10' },
     { name: 'November', value: '11' },
     { name: 'December', value: '12' },
-  ];
+  ], []);
 
-  // প্রথমে সব কাজ ও এমপ্লয়িদের লোড করা (unique employee list সহ)
+  // Load data initially
   useEffect(() => {
+    setLoading(true);
     axiosSecure.get('/works')
       .then(res => {
         setRecords(res.data);
 
-        // unique employees
         const seen = new Set();
         const uniqueEmployees = [];
 
@@ -48,96 +51,98 @@ const Progress = () => {
 
         setEmployees(uniqueEmployees);
       })
-      .catch(err => console.error('Error loading works:', err));
+      .catch(err => console.error('Error loading works:', err))
+      .finally(() => setLoading(false));
   }, [axiosSecure]);
 
-
+  // Load filtered data
   useEffect(() => {
-  
-    if (!selectedMonth && !selectedEmail) {
-      axiosSecure.get('/works')
-        .then(res => setRecords(res.data))
-        .catch(err => console.error('Error loading default records:', err));
-      return;
-    }
+    setLoading(true);
+    let url = '/works';
+    const params = [];
 
-    // মাস সিলেক্ট করা হলে url এ month param যোগ করা হবে
-    // employee email থাকলে url এ email param যোগ হবে
-    let url = `/works?`;
-    if (selectedMonth) url += `month=${selectedMonth}`;
-    if (selectedEmail) url += `${selectedMonth ? '&' : ''}email=${selectedEmail}`;
+    if (selectedMonth) params.push(`month=${selectedMonth}`);
+    if (selectedEmail) params.push(`email=${selectedEmail}`);
+    if (params.length) url += `?${params.join('&')}`;
 
     axiosSecure.get(url)
       .then(res => setRecords(res.data))
-      .catch(err => console.error('Error loading filtered data:', err));
+      .catch(err => console.error('Error loading filtered works:', err))
+      .finally(() => setLoading(false));
   }, [selectedEmail, selectedMonth, axiosSecure]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h2 className="text-3xl font-bold text-center mb-2 text-gray-800">
+      <h2 className="text-3xl font-bold text-center mb-6 text-red-500">
         Employee Work Progress
       </h2>
 
-    
-
-      {/* Filter Section */}
+      {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 justify-center mb-8">
-        <select
-          className="border px-4 py-2 rounded-md shadow-sm focus:outline-none"
-          value={selectedEmail}
-          onChange={e => setSelectedEmail(e.target.value)}
-        >
-          <option value="">All Employees</option>
-          {employees.map(emp => (
-            <option key={emp.email} value={emp.email}>
-              {emp.name}
-            </option>
-          ))}
-        </select>
+        <div className="form-control w-full max-w-xs">
+          <label className="label">
+            <span className="label-text text-base text-black">Employee</span>
+          </label>
+          <select
+            className="select select-bordered rounded-4xl w-full"
+            value={selectedEmail}
+            onChange={e => setSelectedEmail(e.target.value)}
+          >
+            <option value="">All Employees</option>
+            {employees.map(emp => (
+              <option key={emp.email} value={emp.email}>
+                {emp.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <select
-          className="border px-4 py-2 rounded-md shadow-sm focus:outline-none"
-          value={selectedMonth}
-          onChange={e => setSelectedMonth(e.target.value)}
-        >
-          <option value="">All Months</option>
-          {months.map(({ name, value }) => (
-            <option key={value} value={value}>
-              {name}
-            </option>
-          ))}
-        </select>
+        <div className="form-control w-full max-w-xs">
+          <label className="label">
+            <span className="label-text text-black text-base">Month</span>
+          </label>
+          <select
+            className="select select-bordered rounded-4xl w-full"
+            value={selectedMonth}
+            onChange={e => setSelectedMonth(e.target.value)}
+          >
+            <option value="">All Months</option>
+            {months.map(({ name, value }) => (
+              <option key={value} value={value}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* Work Records */}
-      {records.length === 0 ? (
-        <>
-          <p className="text-center text-red-500 font-semibold">
-            No work records found. Please check filters or try again later.
-          </p>
-          {/*
-            ডাটা না থাকলে এই মেসেজ দেখানো হবে,
-            HR এবং ইউজাররা বুঝতে পারবে কোন কারণে ডাটা নেই
-          */}
-        </>
+      {/* Loading or Data */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <PRLoading key={i} />
+          ))}
+        </div>
+      ) : records.length === 0 ? (
+        <p className="text-center text-red-500 font-semibold">
+          No work records found. Please adjust filters.
+        </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {records.map(record => (
             <div
               key={record._id}
-              className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition"
+              className="card bg-base-100 border border-gray-200 rounded-2xl p-5 shadow hover:shadow-lg transition"
             >
-              <h3 className="text-lg font-semibold text-indigo-700 mb-2 flex items-center gap-2">
-                <FaUserTie className="text-indigo-500" /> {record.name || 'Unnamed'}
+              <h3 className="text-lg font-semibold text-red-500 mb-3 flex items-center gap-2">
+                <FaUserTie /> {record.name || 'Unnamed'}
               </h3>
-              <p className="text-gray-700 mb-1">
-                <strong>Task:</strong> {record.task}
+              <p className="text-gray-700 mb-2"><strong>Task:</strong> {record.task}</p>
+              <p className="text-gray-700 mb-2 flex items-center gap-2">
+                <FaClock className="text-red-500" /> <strong>Hours:</strong> {record.hours}
               </p>
-              <p className="text-gray-700 mb-1 flex items-center gap-1">
-                <FaClock className="text-yellow-500" /> <strong>Hours:</strong> {record.hours}
-              </p>
-              <p className="text-gray-700 flex items-center gap-1">
-                <FaCalendarAlt className="text-green-500" /> <strong>Date:</strong>{' '}
+              <p className="text-gray-700 flex items-center gap-2">
+                <FaCalendarAlt className="text-red-500" /> <strong>Date:</strong>{' '}
                 {record.date ? new Date(record.date).toLocaleDateString() : 'N/A'}
               </p>
             </div>

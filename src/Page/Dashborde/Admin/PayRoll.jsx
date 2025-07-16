@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { format } from "date-fns";
+import { useNavigate } from "react-router";
+import Swal from "sweetalert2";
+import { FaEnvelope } from "react-icons/fa";  // <-- ইমেইল আইকন ইমপোর্ট
 import UseAxios from "../../../Hooks/UseAxios";
+import LoadingCard from "../../Shared/LoadingCard";
 
 const PayRoll = () => {
   const [payments, setPayments] = useState([]);
@@ -8,15 +12,15 @@ const PayRoll = () => {
   const [isPaying, setIsPaying] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState("All Employees");
   const axiosSecure = UseAxios();
+  const navigate = useNavigate();
 
-  // Fetch all payrolls
   useEffect(() => {
     const fetchPayments = async () => {
       try {
         const res = await axiosSecure.get("/payroll/all");
         setPayments(res.data);
       } catch (err) {
-        console.error("❌ Failed to fetch payments:", err?.message || err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -24,122 +28,134 @@ const PayRoll = () => {
     fetchPayments();
   }, [axiosSecure]);
 
-  // Unique employee list for dropdown
   const employeeList = useMemo(() => {
     const names = payments.map((p) => p.name);
-    const unique = Array.from(new Set(names));
-    return ["All Employees", ...unique];
+    return ["All Employees", ...new Set(names)];
   }, [payments]);
 
-  // Handle dropdown change
-  const handleSelect = (e) => {
-    setSelectedEmployee(e.target.value);
-  };
+  const handleSelect = (e) => setSelectedEmployee(e.target.value);
 
-  // Filtered payments based on selection
   const displayedPayments = useMemo(() => {
     return selectedEmployee === "All Employees"
       ? payments
       : payments.filter((p) => p.name === selectedEmployee);
   }, [payments, selectedEmployee]);
 
-  // Handle Pay button
-  const handlePay = async (paymentId) => {
-    if (!window.confirm("Are you sure you want to process this payment?"))
-      return;
-    try {
-      setIsPaying(paymentId);
-      const res = await axiosSecure.patch(`/payroll/pay/${paymentId}`);
-      const updated = res.data;
-      setPayments((prev) =>
-        prev.map((item) =>
-          item._id === paymentId ||
-          item._id?.toString() === paymentId?.toString()
-            ? { ...item, paid: true, paymentDate: updated.paymentDate }
-            : item
-        )
-      );
-    } catch (err) {
-      console.error("❌ Payment failed:", err?.message || err);
-      alert("Payment failed. Please try again.");
-    } finally {
-      setIsPaying(null);
+  const handlePay = (payment) => {
+    if (payment.paid) return;
+
+    const alreadyPaid = payments.find(
+      (p) =>
+        p.name === payment.name &&
+        p.month === payment.month &&
+        p.year === payment.year &&
+        p.paid
+    );
+
+    if (alreadyPaid) {
+      return Swal.fire({
+        icon: "info",
+        title: "Already Paid",
+        text: `${payment.name} already received salary for ${payment.month} ${payment.year}`,
+      });
     }
+
+    Swal.fire({
+      title: `Pay ৳${payment.salary} to ${payment.name}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Pay",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#dc2626",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setIsPaying(payment._id);
+        navigate(`/dashboard/payment/${payment._id}`);
+        setTimeout(() => setIsPaying(null), 1000);
+      }
+    });
   };
 
-  if (loading) return <div className="text-center mt-10">Loading...</div>;
+  if (loading) {
+    return <LoadingCard></LoadingCard>
+  }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 space-y-6">
-      <h2 className="text-3xl font-bold">Payroll Approval Requests</h2>
+    <div className="p-4">
+      {/* Title */}
+      <h2 className="text-3xl md:text-4xl font-extrabold text-center text-red-600 mb-6">
+        Payroll Approval Requests
+      </h2>
 
-      {/* Employee Filter */}
-      <div>
-        <label className="mr-4 font-medium">Filter by Employee:</label>
-        <select
-          value={selectedEmployee}
-          onChange={handleSelect}
-          className="border rounded px-3 py-1"
-        >
-          {employeeList.map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
+      {/* Filter Left Side with Gradient */}
+      <div className="flex justify-start mb-4">
+        <div className="p-2 rounded-lg flex items-center">
+          <label className="mr-2 text-base font-medium text-gray-900">Filter:</label>
+          <select
+            value={selectedEmployee}
+            onChange={handleSelect}
+            className="px-4 py-2 focus:outline-none text-sm border-gray-300 focus:ring-2 focus:ring-red-500"
+          >
+            {employeeList.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 rounded">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="p-3 border">#</th>
-              <th className="p-3 border">Employee Name</th>
-              <th className="p-3 border">Email</th>
-              <th className="p-3 border">Salary</th>
-              <th className="p-3 border">Month</th>
-              <th className="p-3 border">Year</th>
-              <th className="p-3 border">Payment Date</th>
-              <th className="p-3 border">Action</th>
+      <div className="overflow-x-auto bg-white p-4 rounded-lg shadow-md">
+        <table className="table w-full text-sm md:text-base">
+          <thead className="bg-red-100 text-red-700 uppercase">
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th className="hidden sm:table-cell">Email</th>
+              <th>Salary</th>
+              <th>Month</th>
+              <th>Year</th>
+              <th className="hidden md:table-cell">Payment Date</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {displayedPayments.map((payment, idx) => (
-              <tr key={payment._id} className="hover:bg-gray-50">
-                <td className="p-3 border">{idx + 1}</td>
-                <td className="p-3 border">{payment.name}</td>
-                <td className="p-3 border">{payment.email}</td>
-                <td className="p-3 border">৳ {payment.salary}</td>
-                <td className="p-3 border">{payment.month}</td>
-                <td className="p-3 border">{payment.year}</td>
-                <td className="p-3 border">
-                  {payment.paymentDate
-                    ? format(new Date(payment.paymentDate), "PPP")
-                    : "Not Paid"}
-                </td>
-                <td className="p-3 border">
-                  <button
-                    onClick={() => handlePay(payment._id)}
-                    disabled={payment.paid || isPaying === payment._id}
-                    className={`px-4 py-1 rounded text-white transition duration-200 ${
-                      payment.paid || isPaying === payment._id
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-green-600 hover:bg-green-700"
-                    }`}
-                  >
-                    {payment.paid
-                      ? "Paid"
-                      : isPaying === payment._id
-                      ? "Paying..."
-                      : "Pay"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {displayedPayments.length === 0 && (
+            {displayedPayments.length > 0 ? (
+              displayedPayments.map((p, idx) => (
+                <tr key={p._id} className="hover:bg-red-50 transition-all">
+                  <td>{idx + 1}</td>
+                  <td className="font-bold text-gray-800">{p.name}</td>
+                  <td className="hidden sm:table-cell flex items-center gap-2 text-gray-700">
+                    <FaEnvelope className="text-red-600" />
+                    {p.email}
+                  </td>
+                  <td className="badge mt-5 badge-outline badge-secondary">৳{p.salary}</td>
+                  <td>{p.month}</td>
+                  <td>{p.year}</td>
+                  <td className="hidden md:table-cell">
+                    {p.paymentDate ? format(new Date(p.paymentDate), "PPP") : "Not Paid"}
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => handlePay(p)}
+                      disabled={p.paid || isPaying === p._id}
+                      className={`px-5 py-2 rounded-full text-white text-sm font-semibold transition duration-300 ease-in-out shadow-md ${
+                        p.paid || isPaying === p._id
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800"
+                      }`}
+                    >
+                      {p.paid ? "Paid" : isPaying === p._id ? "Paying..." : "Pay"}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
               <tr>
-                <td colSpan={8} className="p-4 text-center">No requests found.</td>
+                <td colSpan="8" className="text-center py-10 text-gray-500">
+                  No payroll requests found.
+                </td>
               </tr>
             )}
           </tbody>

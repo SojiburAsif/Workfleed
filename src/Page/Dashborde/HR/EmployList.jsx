@@ -10,10 +10,12 @@ import {
   FaTimesCircle,
   FaMoneyCheckAlt,
   FaInfoCircle,
+  FaEnvelope,
 } from "react-icons/fa";
 import UseAxios from "../../../Hooks/UseAxios";
 import UseAuth from "../../../Hooks/UseAuth";
 import { useNavigate, Outlet } from "react-router";
+import LoadingCard from "../../Shared/LoadingCard";
 
 const EmployeeList = () => {
   const [users, setUsers] = useState([]);
@@ -40,35 +42,29 @@ const EmployeeList = () => {
         setLoading(false);
       }
     };
-
     fetchUsers();
   }, [axiosSecure]);
 
   const toggleVerified = async (user) => {
     if (user.role === "admin") return;
-
     try {
       const updatedStatus = !user.isVerified;
       await axiosSecure.put(`/users/${user._id}`, {
         isVerified: updatedStatus,
       });
-
       setUsers((prev) =>
         prev.map((u) =>
           u._id === user._id ? { ...u, isVerified: updatedStatus } : u
         )
       );
-
       Swal.fire(
         "Success",
-        `User verification set to ${
-          updatedStatus ? "Verified ✅" : "Not Verified ❌"
-        }`,
+        `User is now ${updatedStatus ? "Verified ✅" : "Not Verified ❌"}`,
         "success"
       );
     } catch (error) {
       console.error(error);
-      Swal.fire("Error", "Failed to update verification", "error");
+      Swal.fire("Error", "Verification update failed", "error");
     }
   };
 
@@ -86,11 +82,11 @@ const EmployeeList = () => {
 
   const submitPayRequest = async () => {
     if (!payMonth || !payYear) {
-      Swal.fire("Missing Info", "Please select both month and year.", "warning");
+      Swal.fire("Missing Info", "Please select both month and year", "warning");
       return;
     }
 
-    const requestPayload = {
+    const payload = {
       userId: selectedUser._id,
       name: selectedUser.name,
       email: selectedUser.email,
@@ -104,16 +100,13 @@ const EmployeeList = () => {
     };
 
     try {
-      const res = await axiosSecure.post("/payroll", requestPayload);
-
+      const res = await axiosSecure.post("/payroll", payload);
       if (res.data.insertedId) {
         Swal.fire("Success", "Payment request sent!", "success");
         closePayModal();
-      } else {
-        throw new Error("Insert failed");
-      }
+      } else throw new Error("Insert failed");
     } catch (error) {
-      console.error("Payroll Request Error:", error);
+      console.error(error);
       Swal.fire("Error", "Failed to send payment request", "error");
     }
   };
@@ -128,120 +121,106 @@ const EmployeeList = () => {
         header: "Name",
         accessorKey: "name",
         cell: ({ row }) => {
-          const user = row.original;
+          const u = row.original;
           return (
-            <span>
-              {user.name}
-              {user.role === "admin" && (
-                <span className="ml-2 text-xs text-white bg-red-600 px-2 py-0.5 rounded-full">
+            <div className="flex items-center gap-2 text-black text-base">
+              {u.name}
+              {u.role === "admin" && (
+                <span className="badge badge-outline badge-secondary badge-sm text-base">
                   Admin
                 </span>
               )}
-            </span>
+            </div>
           );
         },
       },
       {
         header: "Email",
         accessorKey: "email",
+        cell: ({ row }) => {
+          const email = row.original.email;
+          return (
+            <div className="flex items-center gap-2 text-black text-base">
+              <FaEnvelope className="text-gray-700" />
+              {email}
+            </div>
+          );
+        },
       },
       {
         header: "Verified",
         accessorKey: "isVerified",
         cell: ({ row }) => {
-          const user = row.original;
-          const isVerified = user.isVerified || false;
-          const isAdmin = user.role === "admin";
-
+          const u = row.original;
+          const isAdmin = u.role === "admin";
+          const isVerified = u.isVerified || false;
           return (
             <button
-              onClick={() => {
-                if (!isAdmin) toggleVerified(user);
-              }}
+              onClick={() => !isAdmin && toggleVerified(u)}
               disabled={isAdmin}
-              className={`flex items-center gap-1 text-xl ${
-                isAdmin ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              title={
-                isAdmin
-                  ? "Cannot change verification for Admin"
-                  : isVerified
-                  ? "Click to mark Unverified"
-                  : "Click to mark Verified"
-              }
+              className="flex items-center gap-2 text-black text-base"
             >
               {isVerified ? (
-                <>
-                  <FaCheckCircle className="text-green-600" />
-                  <span className="ml-1 text-green-700 font-semibold">
-                    Verified
-                  </span>
-                </>
+                <span className="text-green-600 flex items-center gap-1 text-xl">
+                  <FaCheckCircle /> Verified
+                </span>
               ) : (
-                <>
-                  <FaTimesCircle className="text-red-600" />
-                  <span className="ml-1 text-red-700 font-semibold">
-                    Not Verified
-                  </span>
-                </>
+                <span className="text-red-600 flex items-center gap-1 text-xl">
+                  <FaTimesCircle /> Not Verified
+                </span>
               )}
             </button>
           );
         },
       },
       {
-        header: "Bank Account",
+        header: "Bank A/C",
         accessorKey: "bank_account_no",
-        cell: ({ row }) => row.original.bank_account_no || "N/A",
+        cell: ({ getValue }) => (
+          <span className="text-black text-base">{getValue() || "N/A"}</span>
+        ),
       },
       {
         header: "Salary",
         accessorKey: "salary",
-        cell: ({ row }) => {
-          const salary = Number(row.original.salary);
-          return !isNaN(salary) ? salary.toFixed(2) : "N/A";
+        cell: ({ getValue }) => {
+          const val = Number(getValue());
+          return (
+            <span className="text-black text-base">
+              {!isNaN(val) ? `${val.toFixed(2)} ৳` : "N/A"}
+            </span>
+          );
         },
       },
       {
         header: "Pay",
         cell: ({ row }) => {
-          const user = row.original;
-          const isDisabled = !user.isVerified || user.role === "admin";
+          const u = row.original;
+          const disabled = !u.isVerified || u.role === "admin";
           return (
             <button
-              disabled={isDisabled}
-              onClick={() => openPayModal(user)}
-              className={`btn btn-sm ${
-                isDisabled ? "btn-gray cursor-not-allowed opacity-60" : "btn-green"
-              } flex items-center gap-1`}
-              title={
-                user.role === "admin"
-                  ? "Cannot pay Admin"
-                  : user.isVerified
-                  ? "Pay this employee"
-                  : "Cannot pay unverified employee"
-              }
+              onClick={() => openPayModal(u)}
+              disabled={disabled}
+              className={`btn btn-md px-6 py-2 text-white text-base rounded shadow-md transition ${disabled
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-red-600 via-red-500 to-red-600 hover:from-red-700"
+                } flex items-center gap-2`}
             >
-              <FaMoneyCheckAlt />
-              Pay
+              <FaMoneyCheckAlt /> Pay
             </button>
           );
         },
       },
       {
         header: "Details",
-        cell: ({ row }) => {
-          const user = row.original;
-          return (
-            <button
-              onClick={() => openDetailsPage(user)}
-              className="btn btn-sm btn-blue flex items-center gap-1"
-            >
-              <FaInfoCircle />
-              Details
-            </button>
-          );
-        },
+        cell: ({ row }) => (
+          <button
+            onClick={() => openDetailsPage(row.original)}
+            className="btn btn-md px-6 py-2 bg-gray-800 text-white text-base rounded shadow-md hover:from-blue-600 flex items-center gap-2"
+          >
+            <FaInfoCircle /> View
+          </button>
+        ),
       },
     ],
     []
@@ -255,153 +234,138 @@ const EmployeeList = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4">Employee List</h2>
+      <h2 className="text-2xl font-bold text-black mb-4">Employee List</h2>
 
       {loading ? (
-        <p>Loading...</p>
+        <LoadingCard></LoadingCard>
       ) : (
         <div className="overflow-x-auto">
-          <table className="table-auto w-full border border-gray-300 rounded-md">
-            <thead className="bg-gray-200">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="border px-4 py-2 text-left text-gray-700"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+          <table className="table w-full">
+            <thead className="bg-base-200">
+              {table.getHeaderGroups().map((hg) => (
+                <tr key={hg.id}>
+                  {hg.headers.map((header) => (
+                    <th key={header.id} className="text-black text-base">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
                 </tr>
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.length === 0 && (
+              {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="text-center py-4">
+                  <td colSpan={columns.length} className="text-center py-4 text-black text-base">
                     No employees found.
                   </td>
                 </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="text-black text-base">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))
               )}
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-100 border-b border-gray-300"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className="border px-4 py-2 text-gray-800"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
             </tbody>
           </table>
         </div>
       )}
 
-      {/* Nested Route Render */}
-      <div className="mt-6">
-        <Outlet />
-      </div>
+      <Outlet />
 
-      {/* Pay Modal */}
       {payModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl p-6 w-96 max-w-full shadow-2xl z-50">
-            <h3 className="text-xl font-semibold mb-4 text-center">
-              Pay Salary - {selectedUser?.name}
+        <dialog open className="modal modal-open">
+          <div className="modal-box w-full max-w-2xl rounded-xl border border-red-500 shadow-lg">
+            {/* Close button */}
+            <form method="dialog" className="absolute right-3 top-3">
+              <button onClick={closePayModal} className="btn btn-sm btn-circle btn-ghost">
+                ✕
+              </button>
+            </form>
+
+            <h3 className="font-bold text-3xl text-center text-red-600 mb-8">
+              Pay Salary to {selectedUser?.name}
             </h3>
-            <div className="mb-4">
-              <label className="block mb-1 font-medium">Salary</label>
-              <input
-                type="text"
-                readOnly
-                value={
-                  typeof selectedUser?.salary === "number"
-                    ? selectedUser.salary.toFixed(2)
-                    : !isNaN(Number(selectedUser?.salary))
-                    ? Number(selectedUser.salary).toFixed(2)
-                    : "N/A"
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
-              />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
+              {/* Salary Info */}
+              <div className="form-control">
+                <label className="label font-medium text-base text-black">
+                  Salary Amount (৳)
+                </label>
+                <input
+                  type="text"
+                  readOnly
+                  value={
+                    typeof selectedUser?.salary === "number"
+                      ? selectedUser.salary.toFixed(2)
+                      : !isNaN(Number(selectedUser?.salary))
+                        ? Number(selectedUser.salary).toFixed(2)
+                        : "N/A"
+                  }
+                  className="input input-bordered bg-base-100 text-black text-base w-full"
+                />
+              </div>
+
+              {/* Month Selector */}
+              <div className="form-control">
+                <label className="label font-medium text-base text-black">
+                  Select Month
+                </label>
+                <select
+                  value={payMonth}
+                  onChange={(e) => setPayMonth(e.target.value)}
+                  className="select select-bordered bg-base-100 text-black text-base w-full"
+                >
+                  <option value="">Choose Month</option>
+                  {[
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                  ].map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Year Input */}
+              <div className="form-control md:col-span-2">
+                <label className="label font-medium text-base text-black">
+                  Enter Year
+                </label>
+                <input
+                  type="number"
+                  value={payYear}
+                  onChange={(e) => setPayYear(e.target.value)}
+                  placeholder="e.g. 2025"
+                  className="input input-bordered bg-base-100 text-black text-base w-full"
+                />
+              </div>
             </div>
-            <div className="mb-4">
-              <label htmlFor="payMonth" className="block mb-1 font-medium">
-                Month
-              </label>
-              <select
-                id="payMonth"
-                value={payMonth}
-                onChange={(e) => setPayMonth(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              >
-                <option value="">Select month</option>
-                {[
-                  "January",
-                  "February",
-                  "March",
-                  "April",
-                  "May",
-                  "June",
-                  "July",
-                  "August",
-                  "September",
-                  "October",
-                  "November",
-                  "December",
-                ].map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="mb-6">
-              <label htmlFor="payYear" className="block mb-1 font-medium">
-                Year
-              </label>
-              <input
-                id="payYear"
-                type="number"
-                value={payYear}
-                onChange={(e) => setPayYear(e.target.value)}
-                placeholder="e.g. 2025"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                min="2000"
-                max="2100"
-              />
-            </div>
-            <div className="flex justify-end gap-4">
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-4 mt-8 px-2">
               <button
                 onClick={closePayModal}
-                className="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 text-gray-800 transition"
+                className="btn btn-outline text-base border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
               >
                 Cancel
               </button>
               <button
                 onClick={submitPayRequest}
-                className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition"
+                className="btn btn-error text-white text-base"
               >
-                Submit Pay
+                Submit
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
+
+
     </div>
   );
 };

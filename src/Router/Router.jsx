@@ -8,7 +8,7 @@ import Error from "../Error/Error";
 import PrivateRouter from "../Page/Auth/PrivatRouter";
 import DashboardLayout from "../Page/Dashborde/Main/DashbordeLayout";
 import WorkSheet from "../Page/Dashborde/Employe/WorkSheet";
-import PaymentPage from "../Page/Dashborde/Employe/PaymentPage";
+import PaymentPage from "../Page/Dashborde/Admin/Payment";
 import EmployeeList from "../Page/Dashborde/HR/EmployList";
 import EmployDetails from "../Page/Dashborde/HR/EmpoltDeatils"; // spelling fixed
 import Progress from "../Page/Dashborde/HR/Progress";
@@ -18,6 +18,8 @@ import MakeAdmin from "../Page/Dashborde/Admin/MakeAdmin";
 import Forbbiden from "../Forbidden/Forbbiden";
 import AdminRoute from "../Page/Auth/AdminRoute";
 import HRRoute from "../Page/Auth/HRPrivateRoute";
+import Contact from "../Page/Dashborde/Contact/Contact";
+
 
 export const router = createBrowserRouter([
   {
@@ -60,11 +62,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "employList/details/:id",
-        element: <HRRoute><EmployDetails /></HRRoute>
+        element: <EmployDetails />
       },
       {
         path: 'progress',
-        element: <HRRoute><Progress></Progress></HRRoute>
+        element: <Progress></Progress>
       },
       {
         path: 'makeAdmin',
@@ -81,6 +83,14 @@ export const router = createBrowserRouter([
         element: <AdminRoute>
           <PayRoll></PayRoll>
         </AdminRoute>
+      },
+      {
+        path: 'payment/:id',
+        element: <PaymentPage />
+      },
+      {
+        path: 'contact-us',
+        element: <Contact></Contact>
       }
     ],
   },
