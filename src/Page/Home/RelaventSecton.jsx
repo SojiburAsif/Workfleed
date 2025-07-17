@@ -48,7 +48,7 @@ const ShopSupport = () => {
           </div>
 
           <p className="mt-10 text-white leading-relaxed">
-            <span className="text-red-400 underline cursor-pointer">Shopify Checkout</span> outperforms other platforms with a 15% higher average conversion rate — giving you access to over 150 million ready-to-buy customers.
+            <span className="text-red-400 underline cursor-pointer">WorkFleed</span> outperforms other platforms with a 15% higher average conversion rate — giving you access to over 150 million ready-to-buy customers.
           </p>
 
           <p className="mt-4 text-white text-sm">

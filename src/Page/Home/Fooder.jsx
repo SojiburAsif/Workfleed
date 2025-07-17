@@ -11,7 +11,7 @@ const Footer = () => {
         <h1 className="text-3xl font-bold flex justify-center items-center space-x-3">
           <Logo />
         </h1>
-        <p className="text-gray-600 mt-2 text-sm italic">
+        <p className="text-gray-600 mt-2 text-sm ">
           Empowering Teams. Elevating Productivity.
         </p>
       </div>
@@ -44,7 +44,7 @@ const Footer = () => {
         {/* Contact & Social */}
         <div>
           <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
-          <p className="text-gray-700 mb-4">support@workfleet.com</p>
+          <p className="text-gray-700 mb-4">web.asif@gmail.com</p>
           <div className="flex space-x-4 text-red-600 mb-6">
             <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="hover:text-red-400 transition">
               <FaFacebookF size={20} />
