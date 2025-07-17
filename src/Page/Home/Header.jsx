@@ -4,11 +4,12 @@ import { AuthContext } from '../Auth/AuthContext';
 import { FiChevronDown } from 'react-icons/fi';
 import Logo from '../Shared/Logo';
 import UseAuth from '../../Hooks/UseAuth';
+import UseAxios from '../../Hooks/UseAxios';
 
 const Header = () => {
   const { user,logout  } = UseAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+  // const asxiosSecure = UseAxios();
 
 
   const navLinkClass = ({ isActive }) =>
@@ -71,7 +72,7 @@ const Header = () => {
             </div>
           </div>
 
-          <NavLink to="/contact" className={navLinkClass}>Contact</NavLink>
+          <NavLink to="dashboard/contact-us" className={navLinkClass}>Contact</NavLink>
         </nav>
 
         {/* Right: Auth buttons / Avatar */}

@@ -1,107 +1,130 @@
 import React from 'react';
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet, useNavigate } from 'react-router';
 import {
   FaBars, FaHome, FaFileInvoiceDollar, FaTasks,
-  FaUsersCog, FaUserTie, FaUser, FaUserShield
+  FaUsersCog, FaUserTie, FaUser, FaUserShield, FaSignOutAlt
 } from 'react-icons/fa';
 import Logo from '../../Shared/Logo';
 import useUserRole from '../../../Hooks/UseUserRole';
+import UseAuth from '../../../Hooks/UseAuth';
 
 const DashboardLayout = () => {
   const { role: rawRole } = useUserRole();
-  const role = rawRole?.toLowerCase(); // Normalize: 'admin', 'hr', 'employee'
+  const role = rawRole?.toLowerCase();
+  const { logout } = UseAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-2 ${isActive ? 'font-bold text-red-700' : 'text-red-500'}`;
+    `flex items-center gap-2 ${isActive ? 'font-bold text-red-600' : 'text-black'}`;
 
   return (
     <div className="drawer lg:drawer-open">
       <input id="dashboard-drawer" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col">
-        <div className="p-4 lg:hidden">
+      
+      {/* Content Area */}
+      <div className="drawer-content flex flex-col p-4 mx-4 my-4">
+        <div className="lg:hidden mb-4">
           <label htmlFor="dashboard-drawer" className="btn">
             <FaBars className="mr-2" /> Menu
           </label>
         </div>
-        <div className="p-4">
+        <div className="flex-1">
           <Outlet />
         </div>
       </div>
 
+      {/* Sidebar */}
       <div className="drawer-side">
         <label htmlFor="dashboard-drawer" className="drawer-overlay"></label>
-        <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
-          <li className="mb-4"><Logo /></li>
+        <ul className="menu p-6 w-64 min-h-full bg-white text-black mx-4 my-4 rounded-lg shadow-lg flex flex-col justify-between">
+          <div>
+            <li className="mb-6"><Logo /></li>
 
-          {/* Shared - All Users */}
-          <li>
-            <NavLink to="/dashboard" className={linkClass}>
-              <FaHome /> Dashboard Home
-            </NavLink>
-          </li>
+            {/* Shared - All Users */}
+            <li>
+              <NavLink to="/dashboard" className={linkClass}>
+                <FaHome /> Dashboard Home
+              </NavLink>
+            </li>
 
-          {/* Employee Only */}
-          {role === 'employee' && (
-            <>
-              <li className="menu-title mt-4 text-red-500">Employee</li>
-              <li>
-                <NavLink to="/dashboard/work-sheet" className={linkClass}>
-                  <FaTasks /> Work Sheet
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/dashboard/payment-history" className={linkClass}>
-                  <FaFileInvoiceDollar /> Payment History
-                </NavLink>
-              </li>
-            </>
-          )}
+            {/* Employee */}
+            {role === 'employee' && (
+              <>
+                <li className="menu-title mt-6 text-red-500">Employee</li>
+                <li>
+                  <NavLink to="/dashboard/work-sheet" className={linkClass}>
+                    <FaTasks /> Work Sheet
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard/payment-history" className={linkClass}>
+                    <FaFileInvoiceDollar /> Payment History
+                  </NavLink>
+                </li>
+              </>
+            )}
 
-          {/* HR Only */}
-          {role === 'HR' && (
-            <>
-              <li className="menu-title mt-6 text-red-500">HR</li>
-              <li>
-                <NavLink to="/dashboard/employList" className={linkClass}>
-                  <FaUserTie /> Employee List
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/dashboard/progress" className={linkClass}>
-                  <FaUsersCog /> Progress
-                </NavLink>
-              </li>
-            </>
-          )}
+            {/* HR */}
+            {role === 'hr' && (
+              <>
+                <li className="menu-title mt-6 text-red-500">HR</li>
+                <li>
+                  <NavLink to="/dashboard/employList" className={linkClass}>
+                    <FaUserTie /> Employee List
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard/progress" className={linkClass}>
+                    <FaUsersCog /> Progress
+                  </NavLink>
+                </li>
+              </>
+            )}
 
-          {/* Admin Only */}
-          {role === 'admin' && (
-            <>
-              <li className="menu-title mt-6 text-red-500">Admin</li>
-              <li>
-                <NavLink to="/dashboard/makeAdmin" className={linkClass}>
-                  <FaUserShield /> Make Admin
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/dashboard/allEmployeeList" className={linkClass}>
-                  <FaUsersCog /> All Employee List
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/dashboard/payroll" className={linkClass}>
-                  <FaFileInvoiceDollar /> Payroll
-                </NavLink>
-              </li>
-            </>
-          )}
+            {/* Admin */}
+            {role === 'admin' && (
+              <>
+                <li className="menu-title mt-6 text-red-500">Admin</li>
+                <li>
+                  <NavLink to="/dashboard/makeAdmin" className={linkClass}>
+                    <FaUserShield /> Make Admin
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard/allEmployeeList" className={linkClass}>
+                    <FaUsersCog /> All Employee List
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard/payroll" className={linkClass}>
+                    <FaFileInvoiceDollar /> Payroll
+                  </NavLink>
+                </li>
+              </>
+            )}
 
-          {/* Shared - All Users */}
-          <li className="mt-6">
-            <NavLink to="/dashboard/contact-us" className={linkClass}>
-              <FaUser /> Contact Us
-            </NavLink>
-          </li>
+            {/* Shared */}
+            <li className="mt-6">
+              <NavLink to="/dashboard/contact-us" className={linkClass}>
+                <FaUser /> Contact Us
+              </NavLink>
+            </li>
+          </div>
+
+          {/* Logout Button */}
+          <div className="mt-6">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md"
+            >
+              <FaSignOutAlt /> Logout
+            </button>
+          </div>
         </ul>
       </div>
     </div>

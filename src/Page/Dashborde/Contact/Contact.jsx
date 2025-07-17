@@ -45,17 +45,17 @@ const Contact = () => {
                     <div className="flex items-start gap-3">
                         <FaMapMarkerAlt className="text-red-500 mt-1" />
                         <div>
-                            <p className="font-semibold">1234 React Avenue</p>
-                            <p>Frontend City, JS 56789</p>
+                            <p className="font-semibold">Bangladesh</p>
+                            <p>Dinajpur City, PS 5200</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
                         <FaPhoneAlt className="text-red-500" />
-                        <p>+1 (234) 567‑8901</p>
+                        <p>+88017989849494</p>
                     </div>
                     <div className="flex items-center gap-3">
                         <FaEnvelope className="text-red-500" />
-                        <p>support@dummycompany.com</p>
+                        <p>web.asif@gamil.com</p>
                     </div>
                 </div>
 

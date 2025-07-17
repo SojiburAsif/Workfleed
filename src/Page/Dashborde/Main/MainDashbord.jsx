@@ -1,135 +1,158 @@
 import React, { useEffect, useState } from 'react';
 import UseAxios from '../../../Hooks/UseAxios';
+import UseAuth from '../../../Hooks/UseAuth';
 import {
   FaUsers,
   FaMoneyBillWave,
   FaClock,
   FaTasks,
+  FaSpinner,
 } from 'react-icons/fa';
+import { MdVerified, MdClose } from 'react-icons/md';
 import {
-  PieChart, Pie, Cell, Legend, ResponsiveContainer,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
 } from 'recharts';
+import LoadingCard from '../../Shared/LoadingCard';
 
 const MainDashboard = () => {
   const axiosSecure = UseAxios();
+  const { user } = UseAuth();
+
+  const [loading, setLoading] = useState(true);
   const [totalEmployees, setTotalEmployees] = useState(0);
   const [paymentsThisMonth, setPaymentsThisMonth] = useState(0);
   const [pendingApprovals, setPendingApprovals] = useState(0);
   const [totalWorks, setTotalWorks] = useState(0);
-  const [pieData, setPieData] = useState([]);
+  const [barChartData, setBarChartData] = useState([]);
+  const [latestUser, setLatestUser] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. All users
+        const userRes = await axiosSecure.get(`/user/${user.email}`);
+        setLatestUser(userRes.data);
+
         const usersRes = await axiosSecure.get('/users');
         const users = usersRes.data || [];
-
-        const verifiedUsers = users.filter(user => user.isVerified === true);
-        const unverifiedUsers = users.filter(user => user.isVerified === false);
+        const verifiedUsers = users.filter(u => u.isVerified);
+        const unverifiedUsers = users.filter(u => !u.isVerified);
         setTotalEmployees(verifiedUsers.length);
 
-        // 2. All payrolls
         const prRes = await axiosSecure.get('/payroll/all');
-        const payrolls = prRes.data;
-
+        const payrolls = prRes.data || [];
         const now = new Date();
         const monthName = now.toLocaleString('default', { month: 'long' });
         const yearStr = now.getFullYear().toString();
-
-        const thisMonth = payrolls.filter(
-          p => p.month === monthName && p.year === yearStr
-        );
+        const thisMonth = payrolls.filter(p => p.month === monthName && p.year === yearStr);
         setPaymentsThisMonth(thisMonth.length);
 
         const pendingPayrolls = thisMonth.filter(p => !p.paid).length;
-        setPendingApprovals(unverifiedUsers.length + pendingPayrolls); // 🔴 Add unverified users
+        setPendingApprovals(unverifiedUsers.length + pendingPayrolls);
 
-        // 3. Total works
         const workRes = await axiosSecure.get('/works');
-        const works = workRes.data;
+        const works = workRes.data || [];
         setTotalWorks(works.length);
 
-        // Pie chart data
-        setPieData([
+        setBarChartData([
           { name: 'Paid', value: thisMonth.length - pendingPayrolls },
-          { name: 'Pending Payrolls + Unverified', value: unverifiedUsers.length + pendingPayrolls },
-          { name: 'Works', value: works.length },
+          { name: 'Pending + Unverified', value: unverifiedUsers.length + pendingPayrolls },
+          { name: 'Total Works', value: works.length },
         ]);
       } catch (err) {
-        console.error('Dashboard load error', err);
+        console.error('Dashboard load error:', err);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchData();
-  }, [axiosSecure]);
 
-  const COLORS = ['#10B981', '#F59E0B', '#EF4444'];
+    if (user?.email) fetchData();
+  }, [axiosSecure, user?.email]);
+
+  if (loading) {
+    return <LoadingCard></LoadingCard>
+  }
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-8">
-      <h1 className="text-2xl sm:text-3xl font-bold text-center">Welcome to the Dashboard</h1>
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-8 relative min-h-screen">
+      {latestUser && (
+        <div className="absolute top-4 left-4 bg-white shadow-sm rounded-2xl p-4 flex items-center gap-4 z-10">
+          <img
+            src={latestUser.photo}
+            alt={latestUser.name}
+            className="w-14 h-14 rounded-full object-cover border border-gray-300"
+          />
+          <div>
+            <p className="text-lg font-semibold">{latestUser.name}</p>
+            <p className="text-sm text-gray-500 capitalize">{latestUser.role}</p>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              {latestUser.isVerified ? (
+                <>
+                  <MdVerified className="text-green-500 text-xl" />
+                  <span>Verified</span>
+                </>
+              ) : (
+                <>
+                  <MdClose className="text-red-500 text-xl" />
+                  <span>Not Verified</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Summary Cards */}
+      <h1 className="text-2xl sm:text-3xl font-bold text-center mt-27">
+        Welcome to the Dashboard
+      </h1>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {/* Employees */}
-        <div className="bg-white rounded-2xl shadow p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 hover:shadow-md transition">
-          <FaUsers className="text-red-500 text-3xl sm:text-4xl" />
-          <div className="text-center sm:text-left">
-            <h2 className="text-lg sm:text-xl font-semibold">Employees</h2>
-            <p className="text-xl font-bold">{totalEmployees}</p>
+        {[{
+          icon: <FaUsers className="text-red-500 text-3xl sm:text-4xl" />,
+          label: 'Employees',
+          value: totalEmployees
+        }, {
+          icon: <FaTasks className="text-red-500 text-3xl sm:text-4xl" />,
+          label: 'Total Works',
+          value: totalWorks
+        }, {
+          icon: <FaMoneyBillWave className="text-red-500 text-3xl sm:text-4xl" />,
+          label: 'Payments This Month',
+          value: paymentsThisMonth
+        }, {
+          icon: <FaClock className="text-red-500 text-3xl sm:text-4xl" />,
+          label: 'Pending Approvals',
+          value: pendingApprovals
+        }].map(({ icon, label, value }) => (
+          <div key={label} className="bg-white rounded-2xl shadow p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 hover:shadow-md transition">
+            {icon}
+            <div className="text-center sm:text-left">
+              <h2 className="text-lg sm:text-xl font-semibold">{label}</h2>
+              <p className="text-xl font-bold">{value}</p>
+            </div>
           </div>
-        </div>
-
-        {/* Works */}
-        <div className="bg-white rounded-2xl shadow p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 hover:shadow-md transition">
-          <FaTasks className="text-red-500 text-3xl sm:text-4xl" />
-          <div className="text-center sm:text-left">
-            <h2 className="text-lg sm:text-xl font-semibold">Total Works</h2>
-            <p className="text-xl font-bold">{totalWorks}</p>
-          </div>
-        </div>
-
-        {/* Payments */}
-        <div className="bg-white rounded-2xl shadow p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 hover:shadow-md transition">
-          <FaMoneyBillWave className="text-red-500 text-3xl sm:text-4xl" />
-          <div className="text-center sm:text-left">
-            <h2 className="text-lg sm:text-xl font-semibold">Payments This Month</h2>
-            <p className="text-xl font-bold">{paymentsThisMonth}</p>
-          </div>
-        </div>
-
-        {/* Pending */}
-        <div className="bg-white rounded-2xl shadow p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 hover:shadow-md transition">
-          <FaClock className="text-red-500 text-3xl sm:text-4xl" />
-          <div className="text-center sm:text-left">
-            <h2 className="text-lg sm:text-xl font-semibold">Pending Approvals</h2>
-            <p className="text-xl font-bold">{pendingApprovals}</p>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Pie Chart */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-md">
-        <h2 className="text-xl sm:text-2xl font-semibold text-center mb-4">
-          This Month Overview
+      <div className="bg-white p-6 sm:p-8 rounded-2xl w-full">
+        <h2 className="text-xl sm:text-2xl font-semibold text-center mb-6">
+          Monthly Summary Overview
         </h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={pieData}
-              dataKey="value"
-              nameKey="name"
-              innerRadius={60}
-              outerRadius={100}
-              paddingAngle={3}
-              label
-            >
-              {pieData.map((entry, idx) => (
-                <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
-              ))}
-            </Pie>
-            <Legend verticalAlign="bottom" height={36} />
-          </PieChart>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="value" fill="#EF4444" barSize={40} radius={[6, 6, 0, 0]} />
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>

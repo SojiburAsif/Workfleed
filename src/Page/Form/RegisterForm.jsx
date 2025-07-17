@@ -9,7 +9,6 @@ import Swal from 'sweetalert2';
 import UseAuth from '../../Hooks/UseAuth';
 import axios from 'axios';
 import useAxiosIns from '../../Hooks/UseAxiosIns';
-import LoginForm from './LoginForm';
 import Logo from '../Shared/Logo';
 
 const RegisterForm = () => {
@@ -31,7 +30,6 @@ const RegisterForm = () => {
 
   const axiosSecure = useAxiosIns();
 
-  // Image upload functions (imgbb)
   const uploadToImgbb = async (base64Image) => {
     setUploading(true);
     try {
@@ -83,7 +81,6 @@ const RegisterForm = () => {
       return;
     }
 
-    // Password validations extra: uppercase and special char
     const uppercaseReg = /[A-Z]/;
     const specialCharReg = /[!@#$%^&*(),.?":{}|<>]/;
     if (!uppercaseReg.test(data.password)) {
@@ -107,7 +104,6 @@ const RegisterForm = () => {
       setUploadedImageUrl(imageUrl);
 
       await createUser(data.email, data.password);
-
       await updateUser({
         displayName: data.name,
         photoURL: imageUrl,
@@ -119,10 +115,10 @@ const RegisterForm = () => {
         photo: imageUrl,
         role: data.role,
         bank_account_no: data.bankAccount,
-        salary: data.salary,
+        salary: parseInt(data.salary),
         designation: data.designation,
         registeredAt: new Date().toISOString(),
-        isVerified: false,
+        isVerified: data.role === 'HR',
       };
 
       await axiosSecure.post('/users', userInfo);
@@ -153,14 +149,13 @@ const RegisterForm = () => {
         name: user.displayName || 'No Name',
         email: user.email,
         photo: user.photoURL || '',
-        role: 'employee', // Social login always employee
+        role: 'employee',
         bank_account_no: 'N/A',
-        salary: '0',
+        salary: 0,
         designation: 'Employee',
         registeredAt: new Date().toISOString(),
         isVerified: false,
       };
-
 
       await axiosSecure.post('/users', userInfo);
 
@@ -193,7 +188,6 @@ const RegisterForm = () => {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row items-center justify-center bg-gray-50 px-4 py-8 gap-x-4">
-      {/* Logo or Animation */}
       <div className="w-full lg:w-[45%] flex items-center justify-center">
         <Lottie options={defaultOptions} height={350} width={350} />
       </div>
@@ -202,13 +196,9 @@ const RegisterForm = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full lg:w-[40%] max-w-md bg-white p-6 rounded-lg shadow-lg"
       >
-        {/* Profile Picture Upload */}
         <div className="flex flex-col items-center mb-6">
           <label className="mb-2 font-semibold text-gray-700 text-lg">
-            {
-              <Logo></Logo>
-            }
-            Upload Profile Picture
+            <Logo /> Upload Profile Picture
           </label>
           <input
             type="file"
@@ -231,9 +221,7 @@ const RegisterForm = () => {
 
         {/* Name */}
         <div className="mb-4">
-          <label htmlFor="name" className="block mb-1 font-medium text-gray-700">
-            Name
-          </label>
+          <label htmlFor="name" className="block mb-1 font-medium text-gray-700">Name</label>
           <input
             type="text"
             id="name"
@@ -248,9 +236,7 @@ const RegisterForm = () => {
 
         {/* Email */}
         <div className="mb-4">
-          <label htmlFor="email" className="block mb-1 font-medium text-gray-700">
-            Email
-          </label>
+          <label htmlFor="email" className="block mb-1 font-medium text-gray-700">Email</label>
           <input
             type="email"
             id="email"
@@ -263,12 +249,9 @@ const RegisterForm = () => {
           {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
         </div>
 
-        {/* Role Dropdown */}
-        {/* Role Dropdown */}
+        {/* Role */}
         <div className="mb-4">
-          <label htmlFor="role" className="block mb-1 font-medium text-gray-700">
-            Role
-          </label>
+          <label htmlFor="role" className="block mb-1 font-medium text-gray-700">Role</label>
           <select
             id="role"
             {...register('role', { required: 'Please select a role' })}
@@ -276,17 +259,14 @@ const RegisterForm = () => {
           >
             <option value="">Select Role</option>
             <option value="employee">employee</option>
-            <option value="HR">HR</option> 
+            <option value="HR">HR</option>
           </select>
           {errors.role && <p className="text-sm text-red-500 mt-1">{errors.role.message}</p>}
         </div>
 
-
-        {/* Bank Account Number */}
+        {/* Bank Account */}
         <div className="mb-4">
-          <label htmlFor="bankAccount" className="block mb-1 font-medium text-gray-700">
-            Bank Account Number
-          </label>
+          <label htmlFor="bankAccount" className="block mb-1 font-medium text-gray-700">Bank Account Number</label>
           <input
             type="text"
             id="bankAccount"
@@ -303,9 +283,7 @@ const RegisterForm = () => {
 
         {/* Salary */}
         <div className="mb-4">
-          <label htmlFor="salary" className="block mb-1 font-medium text-gray-700">
-            Salary
-          </label>
+          <label htmlFor="salary" className="block mb-1 font-medium text-gray-700">Salary</label>
           <input
             type="number"
             id="salary"
@@ -320,9 +298,7 @@ const RegisterForm = () => {
 
         {/* Designation */}
         <div className="mb-4">
-          <label htmlFor="designation" className="block mb-1 font-medium text-gray-700">
-            Designation
-          </label>
+          <label htmlFor="designation" className="block mb-1 font-medium text-gray-700">Designation</label>
           <input
             type="text"
             id="designation"
@@ -339,9 +315,7 @@ const RegisterForm = () => {
 
         {/* Password */}
         <div className="mb-4 relative">
-          <label htmlFor="password" className="block mb-1 font-medium text-gray-700">
-            Password
-          </label>
+          <label htmlFor="password" className="block mb-1 font-medium text-gray-700">Password</label>
           <input
             type={showPassword ? 'text' : 'password'}
             id="password"
@@ -358,16 +332,12 @@ const RegisterForm = () => {
           >
             {showPassword ? <AiOutlineEyeInvisible size={22} /> : <AiOutlineEye size={22} />}
           </div>
-          {errors.password && (
-            <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
-          )}
+          {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>}
         </div>
 
         {/* Confirm Password */}
         <div className="mb-4 relative">
-          <label htmlFor="confirmPassword" className="block mb-1 font-medium text-gray-700">
-            Confirm Password
-          </label>
+          <label htmlFor="confirmPassword" className="block mb-1 font-medium text-gray-700">Confirm Password</label>
           <input
             type={showConfirmPassword ? 'text' : 'password'}
             id="confirmPassword"
@@ -382,11 +352,7 @@ const RegisterForm = () => {
             className="absolute right-3 top-[38px] cursor-pointer text-gray-600"
             title={showConfirmPassword ? 'Hide password' : 'Show password'}
           >
-            {showConfirmPassword ? (
-              <AiOutlineEyeInvisible size={22} />
-            ) : (
-              <AiOutlineEye size={22} />
-            )}
+            {showConfirmPassword ? <AiOutlineEyeInvisible size={22} /> : <AiOutlineEye size={22} />}
           </div>
           {errors.confirmPassword && (
             <p className="text-sm text-red-500 mt-1">{errors.confirmPassword.message}</p>
@@ -403,36 +369,27 @@ const RegisterForm = () => {
           />
           <label htmlFor="terms" className="text-gray-700 text-sm select-none">
             I accept the{' '}
-            <a
-              href="/terms"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-red-600 underline"
-            >
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-red-600 underline">
               Terms and Conditions
             </a>
           </label>
         </div>
         {errors.terms && <p className="text-sm text-red-500 mt-1">{errors.terms.message}</p>}
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={isSubmitting || uploading}
-          className={`w-full py-3 rounded-md text-white transition ${isSubmitting || uploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'
-            }`}
+          className={`w-full py-3 rounded-md text-white transition ${isSubmitting || uploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'}`}
         >
           {(isSubmitting || uploading) ? 'Processing…' : 'Register'}
         </button>
 
-        {/* OR Divider */}
         <div className="flex items-center my-6">
           <hr className="flex-grow border-gray-300" />
           <span className="mx-2 text-gray-500 text-sm">Or register with</span>
           <hr className="flex-grow border-gray-300" />
         </div>
 
-        {/* Google Sign-in Button */}
         <button
           type="button"
           onClick={onGoogleLogin}
@@ -442,7 +399,6 @@ const RegisterForm = () => {
           Continue with Google
         </button>
 
-        {/* Login Link */}
         <p className="text-center text-sm text-gray-600 mt-6">
           Already have an account?{' '}
           <Link to="/login" className="text-red-600 hover:underline">

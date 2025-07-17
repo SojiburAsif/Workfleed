@@ -6,7 +6,7 @@ import PaymentForm from "./PaymentForm";
 import UseAxios from "../../../Hooks/UseAxios";
 import LoadingCard from "../../Shared/LoadingCard";
 
-const stripePromise = loadStripe("pk_test_51RlT5GPZczT2yMqIWpWfAD5HbgpCqPmPA8ck3xGVLKMtvRSejOBlIHn0dAGUA2KkgU0n4EdfvwQFw2c134cShfnN00C5oZnVs1");
+const stripePromise = loadStripe(import.meta.env.VITE_PAY_Key);
 
 const PaymentPage = () => {
   const { id } = useParams();

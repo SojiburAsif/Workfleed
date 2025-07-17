@@ -58,17 +58,17 @@ export const router = createBrowserRouter([
      },
       {
         path: "employList",
-        element: <EmployeeList />
+        element: <HRRoute><EmployeeList /></HRRoute>
 
-        // <HRRoute></HRRoute>
+        // 
       },
       {
         path: "employList/details/:id",
-        element: <EmployDetails />
+        element: <HRRoute><EmployDetails /></HRRoute>
       },
       {
         path: 'progress',
-        element: <Progress></Progress>
+        element: <HRRoute><Progress></Progress></HRRoute>
       },
       {
         path: 'makeAdmin',
