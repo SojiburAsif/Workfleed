@@ -64,7 +64,7 @@ const HowItWorks = () => {
           <img
             src={howItWorksImg}
             alt="Employee Workflow"
-            className="w-full max-w-md h-[350px] object-cover rounded-xl mx-auto drop-shadow-lg"
+            className="w-full max-w-sm h-[350px] object-cover rounded-xl mx-auto drop-shadow-lg"
           />
         </motion.div>
 
