@@ -21,24 +21,30 @@ const DashboardLayout = () => {
     navigate('/login');
   };
 
+  // Active & inactive link styling
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-2 px-2 py-1 rounded-md ${
+    `flex items-center gap-2 px-2 py-1 rounded-md transition-colors duration-200 ${
       isActive
         ? 'font-bold text-red-600'
         : theme === 'dark'
-        ? 'text-gray-300 hover:text-white hover:bg-gray-700'
-        : 'text-black hover:text-red-600 hover:bg-gray-100'
+        ? 'text-gray-300 hover:text-white hover:bg-gray-800'
+        : 'text-gray-800 hover:text-red-600 hover:bg-gray-100'
     }`;
 
-  const sidebarBg = theme === 'dark' ? 'bg-gray-900 text-gray-300' : 'bg-white text-black';
+  // Sidebar background based on theme
+  const sidebarBg =
+    theme === 'dark'
+      ? 'bg-gray-950 text-gray-300'
+      : 'bg-white text-gray-800';
+
   const drawerOverlayBg = theme === 'dark' ? 'bg-black/70' : 'bg-black/30';
 
   return (
-    <div className="drawer bg-black lg:drawer-open">
+    <div className={`drawer  lg:drawer-open ${theme === 'dark' ? 'bg-black text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
       <input id="dashboard-drawer" type="checkbox" className="drawer-toggle" />
       
       {/* Content Area */}
-      <div className="drawer-content flex flex-col p-4 mx-4 my-4">
+      <div className="drawer-content flex flex-col  ">
         <div className="lg:hidden mb-4">
           <label htmlFor="dashboard-drawer" className="btn">
             <FaBars className="mr-2" /> Menu
@@ -52,7 +58,7 @@ const DashboardLayout = () => {
       {/* Sidebar */}
       <div className="drawer-side">
         <label htmlFor="dashboard-drawer" className={`drawer-overlay ${drawerOverlayBg}`}></label>
-        <ul className={`menu p-6 w-64 min-h-full ${sidebarBg} mx-4 my-4 rounded-lg shadow-lg flex flex-col justify-between`}>
+        <ul className={`menu p-6 w-64 min-h-full ${sidebarBg}   rounded-xl  shadow-lg flex flex-col justify-between`}>
           <div>
             <li className="mb-6"><Logo /></li>
 
@@ -131,7 +137,7 @@ const DashboardLayout = () => {
           <div className="mt-6">
             <button
               onClick={handleLogout}
-              className={`flex items-center gap-2 w-full py-2 px-4 rounded-md ${
+              className={`flex items-center gap-2 w-full py-2 px-4 rounded-md transition-colors duration-200 ${
                 theme === 'dark'
                   ? 'bg-red-600 hover:bg-red-700 text-white'
                   : 'bg-red-600 hover:bg-red-700 text-white'

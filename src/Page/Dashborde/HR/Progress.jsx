@@ -1,17 +1,17 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useContext } from 'react';
 import { FaUserTie, FaCalendarAlt, FaClock } from 'react-icons/fa';
 import UseAxios from '../../../Hooks/UseAxios';
 import PRLoading from '../../Shared/PRLoading';
-
+import { ThemeContext } from '../../../Theme/ThemeProvider';
 
 const Progress = () => {
   const axiosSecure = UseAxios();
-
+  const { theme } = useContext(ThemeContext); 
   const [records, setRecords] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
-  const [loading, setLoading] = useState(true); // ✅ Loading state added
+  const [loading, setLoading] = useState(true);
 
   // Months list
   const months = useMemo(() => [
@@ -71,8 +71,13 @@ const Progress = () => {
       .finally(() => setLoading(false));
   }, [selectedEmail, selectedMonth, axiosSecure]);
 
+
+  const pageBg = theme === 'dark' ? 'bg-black text-gray-200' : 'bg-white text-black';
+  const cardBg = theme === 'dark' ? 'bg-gray-950 border-gray-700 text-gray-200' : 'bg-base-100 border-gray-200 text-gray-700';
+  const labelText = theme === 'dark' ? 'text-gray-300' : 'text-black';
+
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className={`p-6 max-w-7xl mx-auto ${pageBg}`}>
       <h2 className="text-3xl font-bold text-center mb-6 text-red-500">
         Employee Work Progress
       </h2>
@@ -81,10 +86,10 @@ const Progress = () => {
       <div className="flex flex-col md:flex-row gap-4 justify-center mb-8">
         <div className="form-control w-full max-w-xs">
           <label className="label">
-            <span className="label-text text-base text-black">Employee</span>
+            <span className={`label-text text-base ${labelText}`}>Employee</span>
           </label>
           <select
-            className="select select-bordered rounded-4xl w-full"
+            className={`select select-bordered rounded-4xl w-full ${theme === 'dark' ? 'bg-gray-950 border-gray-600 text-gray-200' : ''}`}
             value={selectedEmail}
             onChange={e => setSelectedEmail(e.target.value)}
           >
@@ -99,10 +104,10 @@ const Progress = () => {
 
         <div className="form-control w-full max-w-xs">
           <label className="label">
-            <span className="label-text text-black text-base">Month</span>
+            <span className={`label-text text-base ${labelText}`}>Month</span>
           </label>
           <select
-            className="select select-bordered rounded-4xl w-full"
+            className={`select select-bordered rounded-4xl w-full ${theme === 'dark' ? 'bg-gray-950 border-gray-600 text-gray-200' : ''}`}
             value={selectedMonth}
             onChange={e => setSelectedMonth(e.target.value)}
           >
@@ -132,16 +137,16 @@ const Progress = () => {
           {records.map(record => (
             <div
               key={record._id}
-              className="card bg-base-100 border border-gray-200 rounded-2xl p-5 shadow hover:shadow-lg transition"
+              className={`card border rounded-2xl p-5 shadow hover:shadow-lg transition ${cardBg}`}
             >
               <h3 className="text-lg font-semibold text-red-500 mb-3 flex items-center gap-2">
                 <FaUserTie /> {record.name || 'Unnamed'}
               </h3>
-              <p className="text-gray-700 mb-2"><strong>Task:</strong> {record.task}</p>
-              <p className="text-gray-700 mb-2 flex items-center gap-2">
+              <p className="mb-2"><strong>Task:</strong> {record.task}</p>
+              <p className="mb-2 flex items-center gap-2">
                 <FaClock className="text-red-500" /> <strong>Hours:</strong> {record.hours}
               </p>
-              <p className="text-gray-700 flex items-center gap-2">
+              <p className="flex items-center gap-2">
                 <FaCalendarAlt className="text-red-500" /> <strong>Date:</strong>{' '}
                 {record.date ? new Date(record.date).toLocaleDateString() : 'N/A'}
               </p>

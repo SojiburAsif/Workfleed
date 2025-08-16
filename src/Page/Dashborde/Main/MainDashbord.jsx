@@ -24,7 +24,7 @@ import { ThemeContext } from '../../../Theme/ThemeProvider';
 const MainDashboard = () => {
   const axiosSecure = UseAxios();
   const { user } = UseAuth();
-  const { theme } = useContext(ThemeContext); // Theme context
+  const { theme } = useContext(ThemeContext);
 
   const [loading, setLoading] = useState(true);
   const [totalEmployees, setTotalEmployees] = useState(0);
@@ -78,14 +78,14 @@ const MainDashboard = () => {
 
   if (loading) return <LoadingCard />;
 
-  // Theme-aware classes
+  // Theme-aware styles
   const wrapperBg = theme === 'dark' ? 'bg-black text-gray-100' : 'bg-gray-100 text-gray-900';
-  const cardBg = theme === 'dark' ? 'bg-gray-950 text-gray-100' : 'bg-white text-gray-900';
+  const cardBg = theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900';
   const subText = theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
   const chartStroke = theme === 'dark' ? '#374151' : '#E5E7EB'; // grid lines color
 
   return (
-    <div className={`${wrapperBg} p-4 bg-black sm:p-6 max-w-7xl mx-auto space-y-8 relative min-h-screen`}>
+    <div className={`${wrapperBg}  p-4 sm:p-6 max-w-7xl mx-auto space-y-8 relative min-h-screen`}>
       {latestUser && (
         <div className={`${cardBg} absolute top-4 left-4 shadow-sm rounded-2xl p-4 flex items-center gap-4 z-10`}>
           <img
@@ -117,6 +117,7 @@ const MainDashboard = () => {
         Welcome to the Dashboard
       </h1>
 
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[{
           icon: <FaUsers className="text-red-500 text-3xl sm:text-4xl" />,
@@ -135,7 +136,10 @@ const MainDashboard = () => {
           label: 'Pending Approvals',
           value: pendingApprovals
         }].map(({ icon, label, value }) => (
-          <div key={label} className={`${cardBg} rounded-2xl shadow p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 hover:shadow-md transition`}>
+          <div
+            key={label}
+            className={`${cardBg} rounded-2xl shadow p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 hover:shadow-md transition`}
+          >
             {icon}
             <div className="text-center sm:text-left">
               <h2 className="text-lg sm:text-xl font-semibold">{label}</h2>
@@ -145,6 +149,7 @@ const MainDashboard = () => {
         ))}
       </div>
 
+      {/* Chart */}
       <div className={`${cardBg} p-6 sm:p-8 rounded-2xl w-full`}>
         <h2 className="text-xl sm:text-2xl font-semibold text-center mb-6">
           Monthly Summary Overview
