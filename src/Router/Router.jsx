@@ -21,6 +21,9 @@ import HRRoute from "../Page/Auth/HRPrivateRoute";
 import Contact from "../Page/Dashborde/Contact/Contact";
 import PaymentPage from "../Page/Dashborde/Admin/Payment";
 import PayEmploy from "../Page/Dashborde/Employe/PayEmploy";
+import Trames from "../Page/Home/Trames";
+import About from "../Page/Home/About";
+import Privacy from "../Page/Home/Privacy";
 
 
 export const router = createBrowserRouter([
@@ -113,4 +116,16 @@ export const router = createBrowserRouter([
     path: "*",
     element: <Error />,
   },
+  {
+    path: "/trams",
+    element: <Trames></Trames>
+  },
+  {
+    path: "/about",
+    element: <About></About>
+  },
+  {
+    path: "/privacy",
+    element: <Privacy></Privacy>
+  }
 ]);

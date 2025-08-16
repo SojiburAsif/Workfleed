@@ -1,6 +1,7 @@
-import React from 'react';
-import { FiTrendingUp, FiUsers } from 'react-icons/fi';
+import React, { useContext } from 'react';
+import { FiUsers, FiActivity, FiCheckCircle, FiArrowUp } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import { ThemeContext } from '../../Theme/ThemeProvider';
 
 const fadeInUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -8,100 +9,126 @@ const fadeInUpVariant = {
 };
 
 const ShopSupport = () => {
+  const { theme } = useContext(ThemeContext);
+
+  const sectionBg = theme === 'dark' ? 'bg-black text-gray-200' : 'bg-red-950 text-white';
+  const textColor = theme === 'dark' ? 'text-gray-200' : 'text-white';
+  const accentColor = 'text-red-500';
+  const borderColor = 'border-red-500';
+
   return (
-    <section className="bg-red-950 text-white py-20 lg:px-20">
+    <section className={`${sectionBg} py-16 px-4 sm:px-6 lg:px-20 relative`} id="shop-support">
       <motion.div
-        className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center"
+        className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center"
         initial="hidden"
         whileInView="visible"
         variants={fadeInUpVariant}
         transition={{ duration: 0.8 }}
         viewport={{ once: false, amount: 0.2 }}
       >
-        {/* Left: Checkout Highlight */}
+        {/* Left: Employee Stats */}
         <motion.div
-          className="p-8 rounded-xl"
+          className="p-6 sm:p-8 rounded-xl"
           variants={fadeInUpVariant}
           transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: false, amount: 0.2 }}
         >
-          <h2 className="text-4xl font-bold text-white">
-            The world’s highest-converting checkout system
+          <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold ${textColor} flex items-center gap-2`}>
+            <FiUsers className={`${accentColor} text-3xl`} /> Efficient Employee & HR Management
           </h2>
 
-          <div className="flex flex-col sm:flex-row justify-between gap-10 mt-12">
+          <div className="flex flex-col sm:flex-row justify-between gap-8 sm:gap-10 mt-10">
             <div className="flex items-center gap-4">
-              <FiTrendingUp className="text-red-500 text-4xl" />
+              <FiActivity className={`${accentColor} text-3xl sm:text-4xl`} />
               <div>
-                <h4 className="uppercase text-white text-sm">Improved Conversion Rate</h4>
-                <h2 className="text-5xl font-bold text-white">15%</h2>
+                <h4 className={`uppercase text-xs sm:text-sm ${textColor}`}>Productivity Boost</h4>
+                <h2 className={`text-3xl sm:text-4xl font-bold ${textColor}`}>20%</h2>
+                <p className={`text-xs sm:text-sm ${textColor}`}>Increase in overall team efficiency</p>
               </div>
             </div>
 
             <div className="flex items-center gap-4">
-              <FiUsers className="text-red-500 text-4xl" />
+              <FiCheckCircle className={`${accentColor} text-3xl sm:text-4xl`} />
               <div>
-                <h4 className="uppercase text-white text-sm">Active Buyer Network</h4>
-                <h2 className="text-5xl font-bold text-white">150M+</h2>
+                <h4 className={`uppercase text-xs sm:text-sm ${textColor}`}>Active Employees</h4>
+                <h2 className={`text-3xl sm:text-4xl font-bold ${textColor}`}>500+</h2>
+                <p className={`text-xs sm:text-sm ${textColor}`}>Collaborating across all departments</p>
               </div>
             </div>
           </div>
 
-          <p className="mt-10 text-white leading-relaxed">
-            <span className="text-red-400 underline cursor-pointer">WorkFleed</span> outperforms other platforms with a 15% higher average conversion rate — giving you access to over 150 million ready-to-buy customers.
+          <p className={`mt-8 sm:mt-10 leading-relaxed text-sm sm:text-base ${textColor}`}>
+            Our platform streamlines employee management, boosts team productivity, and keeps HR tasks simple and organized.
           </p>
 
-          <p className="mt-4 text-white text-sm">
-            Based on an independent study conducted by a Big Three global consulting firm (April 2023).
+          <p className={`mt-4 text-xs sm:text-sm ${textColor}`}>
+            Trusted by businesses worldwide to optimize workforce operations and HR processes.
           </p>
         </motion.div>
 
-        {/* Right: HR & Employee Management */}
+        {/* Right: Features */}
         <motion.div
           variants={fadeInUpVariant}
           transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: false, amount: 0.3 }}
         >
-          <h2 className="text-4xl font-bold mb-6 text-white">
-            Smarter Tools for Managing Your Team
+          <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-6 ${textColor} flex items-center gap-2`}>
+            <FiActivity className={`${accentColor} text-3xl`} /> Smart HR & Team Tools
           </h2>
-          <p className="text-lg text-white mb-10">
-            Empower your business with a streamlined solution to track productivity, optimize workflows, and manage employees efficiently — all from a single platform.
+
+          <p className={`text-base sm:text-lg mb-8 sm:mb-10 ${textColor}`}>
+            Track productivity, manage attendance, and get insightful daily reports — all in one place.
           </p>
 
           <div className="space-y-6">
             <motion.div
-              className="border-l-4 border-red-500 pl-4"
+              className={`border-l-4 pl-4 ${borderColor}`}
               variants={fadeInUpVariant}
               transition={{ duration: 0.6, delay: 0.5 }}
-              viewport={{ once: false }}
             >
-              <h3 className="text-xl font-semibold text-white">Real-Time Team Activity</h3>
-              <p className="text-white">Monitor employee engagement and task progress as it happens — stay informed and agile.</p>
+              <h3 className={`text-lg sm:text-xl font-semibold ${textColor} flex items-center gap-2`}>
+                <FiUsers /> Real-Time Team Activity
+              </h3>
+              <p className={`text-sm sm:text-base ${textColor}`}>
+                Monitor employee engagement and tasks as they happen.
+              </p>
             </motion.div>
 
             <motion.div
-              className="border-l-4 border-red-500 pl-4"
+              className={`border-l-4 pl-4 ${borderColor}`}
               variants={fadeInUpVariant}
               transition={{ duration: 0.6, delay: 0.7 }}
-              viewport={{ once: false }}
             >
-              <h3 className="text-xl font-semibold text-white">Insightful Daily Reports</h3>
-              <p className="text-white">Understand who’s contributing and how — with clear daily summaries and analytics.</p>
+              <h3 className={`text-lg sm:text-xl font-semibold ${textColor} flex items-center gap-2`}>
+                <FiCheckCircle /> Insightful Daily Reports
+              </h3>
+              <p className={`text-sm sm:text-base ${textColor}`}>
+                Understand team performance and contributions with clear daily summaries.
+              </p>
             </motion.div>
 
             <motion.div
-              className="border-l-4 border-red-500 pl-4"
+              className={`border-l-4 pl-4 ${borderColor}`}
               variants={fadeInUpVariant}
               transition={{ duration: 0.6, delay: 0.9 }}
-              viewport={{ once: false }}
             >
-              <h3 className="text-xl font-semibold text-white">Fully Integrated HR Tools</h3>
-              <p className="text-white">Automate onboarding, attendance, payroll, and more — giving your HR team more control with less effort.</p>
+              <h3 className={`text-lg sm:text-xl font-semibold ${textColor} flex items-center gap-2`}>
+                <FiActivity /> Automated HR Tools
+              </h3>
+              <p className={`text-sm sm:text-base ${textColor}`}>
+                Simplify onboarding, payroll, attendance, and approvals for your HR team.
+              </p>
             </motion.div>
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Scroll Up Arrow */}
+      <a
+        href="#home"
+        className="absolute top-6 right-6 animate-bounce text-red-500 text-3xl cursor-pointer"
+        title="Scroll to Home"
+      >
+        <FiArrowUp />
+      </a>
     </section>
   );
 };

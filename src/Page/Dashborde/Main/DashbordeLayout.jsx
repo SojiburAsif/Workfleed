@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import {
   FaBars, FaHome, FaFileInvoiceDollar, FaTasks,
@@ -7,12 +7,14 @@ import {
 import Logo from '../../Shared/Logo';
 import useUserRole from '../../../Hooks/UseUserRole';
 import UseAuth from '../../../Hooks/UseAuth';
+import { ThemeContext } from '../../../Theme/ThemeProvider';
 
 const DashboardLayout = () => {
   const { role: rawRole } = useUserRole();
   const role = rawRole?.toLowerCase();
   const { logout } = UseAuth();
   const navigate = useNavigate();
+  const { theme } = useContext(ThemeContext); // Theme context
 
   const handleLogout = async () => {
     await logout();
@@ -20,10 +22,19 @@ const DashboardLayout = () => {
   };
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-2 ${isActive ? 'font-bold text-red-600' : 'text-black'}`;
+    `flex items-center gap-2 px-2 py-1 rounded-md ${
+      isActive
+        ? 'font-bold text-red-600'
+        : theme === 'dark'
+        ? 'text-gray-300 hover:text-white hover:bg-gray-700'
+        : 'text-black hover:text-red-600 hover:bg-gray-100'
+    }`;
+
+  const sidebarBg = theme === 'dark' ? 'bg-gray-900 text-gray-300' : 'bg-white text-black';
+  const drawerOverlayBg = theme === 'dark' ? 'bg-black/70' : 'bg-black/30';
 
   return (
-    <div className="drawer lg:drawer-open">
+    <div className="drawer bg-black lg:drawer-open">
       <input id="dashboard-drawer" type="checkbox" className="drawer-toggle" />
       
       {/* Content Area */}
@@ -40,8 +51,8 @@ const DashboardLayout = () => {
 
       {/* Sidebar */}
       <div className="drawer-side">
-        <label htmlFor="dashboard-drawer" className="drawer-overlay"></label>
-        <ul className="menu p-6 w-64 min-h-full bg-white text-black mx-4 my-4 rounded-lg shadow-lg flex flex-col justify-between">
+        <label htmlFor="dashboard-drawer" className={`drawer-overlay ${drawerOverlayBg}`}></label>
+        <ul className={`menu p-6 w-64 min-h-full ${sidebarBg} mx-4 my-4 rounded-lg shadow-lg flex flex-col justify-between`}>
           <div>
             <li className="mb-6"><Logo /></li>
 
@@ -120,7 +131,11 @@ const DashboardLayout = () => {
           <div className="mt-6">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md"
+              className={`flex items-center gap-2 w-full py-2 px-4 rounded-md ${
+                theme === 'dark'
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-red-600 hover:bg-red-700 text-white'
+              }`}
             >
               <FaSignOutAlt /> Logout
             </button>

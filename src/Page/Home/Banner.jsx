@@ -36,7 +36,7 @@ const slides = [
 
 const Banner = () => {
   return (
-    <div className="w-full px-4 ">
+    <div id='home' className="w-full px-4 ">
       <div className="max-w-full mx-auto mt-3 ">
         <Swiper
           modules={[Autoplay, Pagination]}

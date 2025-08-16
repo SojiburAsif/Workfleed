@@ -1,89 +1,143 @@
-import React from 'react';
-import { FaFacebookF, FaTwitter, FaLinkedinIn, FaEnvelope, FaArrowRight } from 'react-icons/fa';
+import React, { useContext } from 'react';
+import { FaFacebookF, FaTwitter, FaLinkedinIn, FaEnvelope } from 'react-icons/fa';
+import { HiArrowLongRight, HiDocumentText, HiOutlineHome, HiOutlineTag } from 'react-icons/hi2';
+import { FiArrowUp } from 'react-icons/fi';
+import { Link } from 'react-router'; // <-- use react-router-dom
 import Logo from '../Shared/Logo';
-import { HiArrowLongRight } from 'react-icons/hi2';
+import { ThemeContext } from '../../Theme/ThemeProvider';
 
 const Footer = () => {
+  const { theme } = useContext(ThemeContext);
+
+  // Theme-based classes
+  const bgClass = theme === 'dark' ? 'bg-black text-gray-200' : 'bg-black text-gray-200';
+  const textGray = 'text-gray-400';
+  const accentColor = 'text-red-400';
+  const accentHover = 'hover:text-red-500';
+  const borderColor = 'border-gray-700';
+
   return (
-    <footer className="bg-white mt-9  bg-gradient-to-b from-white via-red-50 to-white text-gray-900 py-12 px-6 lg:px-20 border-t border-gray-200">
-      {/* Website Name Centered */}
-      <div className="max-w-7xl mx-auto mb-6 text-center">
-        <h1 className="text-3xl font-bold flex justify-center items-center space-x-3">
-          <Logo />
-        </h1>
-        <p className="text-gray-600 mt-2 text-sm ">
-          Empowering Teams. Elevating Productivity.
-        </p>
-      </div>
-
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
-        
-        {/* About Section */}
-           <div className="flex items-start gap-3">
-      <div>
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          About Us <HiArrowLongRight className="" />
-        </h3>
-        <p className="text-gray-700 leading-relaxed">
-          We provide smart HR and employee management software designed to boost productivity and streamline your business operations.
-        </p>
-      </div>
-    </div>
-
-        {/* Quick Links */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
-          <ul className="space-y-2">
-            <li><a href="#features" className="hover:text-red-600 transition">Features</a></li>
-            <li><a href="#pricing" className="hover:text-red-600 transition">Pricing</a></li>
-            <li><a href="#about" className="hover:text-red-600 transition">About</a></li>
-            <li><a href="#contact" className="hover:text-red-600 transition">Contact</a></li>
-          </ul>
-        </div>
-
-        {/* Contact & Social */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
-          <p className="text-gray-700 mb-4">web.asif@gmail.com</p>
-          <div className="flex space-x-4 text-red-600 mb-6">
-            <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="hover:text-red-400 transition">
-              <FaFacebookF size={20} />
-            </a>
-            <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer" className="hover:text-red-400 transition">
-              <FaTwitter size={20} />
-            </a>
-            <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className="hover:text-red-400 transition">
-              <FaLinkedinIn size={20} />
-            </a>
-            <a href="mailto:support@workfleet.com" aria-label="Email" className="hover:text-red-400 transition">
-              <FaEnvelope size={20} />
-            </a>
-          </div>
-
-          {/* New: Email Input & Submit Button */}
-          <form className="flex flex-col sm:flex-row gap-4 max-w-xs">
-            <input 
-              type="email" 
-              placeholder="Your email address" 
-              required
-              className="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-            <button 
-              type="submit" 
-              className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-md transition"
-            >
-              Submit
-            </button>
-          </form>
-
-          <p className="text-gray-500 text-sm italic mt-4">
-            Have questions or need support? Our team is here to help you succeed. Reach out anytime!
+    <footer className={`${bgClass} py-12 border-t ${borderColor} relative`}>
+      <div className="max-w-7xl px-8 mx-auto">
+        {/* Website Name Centered */}
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-bold flex justify-center items-center space-x-3">
+            <Logo />
+          </h1>
+          <p className="text-gray-500 mt-2 text-sm">
+            Empowering Teams. Elevating Productivity.
           </p>
         </div>
-      </div>
 
-      <div className="mt-12 text-center text-gray-500 text-sm">
-        &copy; {new Date().getFullYear()} WorkFleet. All rights reserved.
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          {/* Terms & About Section */}
+          <div className="flex flex-col gap-6">
+            <Link
+              to="/trams"
+              className="flex items-center gap-3 text-lg font-medium hover:text-red-600 transition"
+            >
+              <HiDocumentText className="w-6 h-6 text-red-500" />
+              Terms & Conditions
+            </Link>
+
+            <div className="flex flex-col gap-3">
+              <h3 className="text-xl font-semibold flex items-center gap-2">
+                About Us <HiArrowLongRight className="w-5 h-5 text-red-500" />
+              </h3>
+              <p className="text-gray-600">
+                We provide smart HR and employee management software designed to boost productivity and streamline your business operations.
+              </p>
+
+              <Link
+                to="/about"
+                className="inline-flex items-center gap-2 px-4 py-2 text-red-600 font-medium transition hover:underline"
+              >
+                View more
+                <HiArrowLongRight className="w-5 h-5 text-red-600" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
+            <ul className="space-y-2  w-34">
+              <li>
+                <a href="#how-it-works" className={`flex items-center gap-2 transition ${accentHover}`}>
+                  <HiOutlineTag className={accentColor} /> Features
+                </a>
+              </li>
+             
+              <li>
+                <Link to="/about" className={`flex items-center gap-2 transition ${accentHover}`}>
+                  <HiOutlineHome className={accentColor} /> About
+                </Link>
+              </li>
+              <li>
+                <Link to="/dashboard/contact-us" className={`flex items-center gap-2 transition ${accentHover}`}>
+                  <HiOutlineHome className={accentColor} /> Contact
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className={`flex items-center gap-2 transition ${accentHover}`}>
+                  <HiDocumentText className={accentColor} /> Privacy Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact & Social */}
+          <div>
+            <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
+            <p className={textGray + " mb-4"}>web.asif@gmail.com</p>
+            <div className={`flex space-x-4 mb-6 ${accentColor}`}>
+              <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer" className={`${accentHover} transition`}>
+                <FaFacebookF size={20} />
+              </a>
+              <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer" className={`${accentHover} transition`}>
+                <FaTwitter size={20} />
+              </a>
+              <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className={`${accentHover} transition`}>
+                <FaLinkedinIn size={20} />
+              </a>
+              <a href="asif81534@gmail.com" aria-label="Email" className={`${accentHover} transition`}>
+                <FaEnvelope size={20} />
+              </a>
+            </div>
+
+            <form className="flex flex-col sm:flex-row gap-4 max-w-xs">
+              <input
+                type="email"
+                placeholder="Your email address"
+                required
+                className="flex-grow px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-900 border-gray-700 text-gray-300"
+              />
+              <button
+                type="submit"
+                className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-md transition"
+              >
+                Submit
+              </button>
+            </form>
+
+            <p className="text-gray-500 text-sm italic mt-4">
+              Have questions or need support? Our team is here to help you succeed. Reach out anytime!
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-12 text-center text-gray-500 text-sm">
+          &copy; {new Date().getFullYear()} WorkFleet. All rights reserved.
+        </div>
+
+        {/* Scroll to Top / Home Button */}
+        <a
+          href="#home"
+          className="absolute top-6 right-6 animate-bounce text-red-500 text-3xl cursor-pointer"
+          title="Scroll to Home"
+        >
+          <FiArrowUp />
+        </a>
       </div>
     </footer>
   );

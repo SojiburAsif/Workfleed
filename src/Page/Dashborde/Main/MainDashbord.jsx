@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import UseAxios from '../../../Hooks/UseAxios';
 import UseAuth from '../../../Hooks/UseAuth';
 import {
@@ -6,7 +6,6 @@ import {
   FaMoneyBillWave,
   FaClock,
   FaTasks,
-  FaSpinner,
 } from 'react-icons/fa';
 import { MdVerified, MdClose } from 'react-icons/md';
 import {
@@ -20,10 +19,12 @@ import {
   Legend,
 } from 'recharts';
 import LoadingCard from '../../Shared/LoadingCard';
+import { ThemeContext } from '../../../Theme/ThemeProvider';
 
 const MainDashboard = () => {
   const axiosSecure = UseAxios();
   const { user } = UseAuth();
+  const { theme } = useContext(ThemeContext); // Theme context
 
   const [loading, setLoading] = useState(true);
   const [totalEmployees, setTotalEmployees] = useState(0);
@@ -75,14 +76,18 @@ const MainDashboard = () => {
     if (user?.email) fetchData();
   }, [axiosSecure, user?.email]);
 
-  if (loading) {
-    return <LoadingCard></LoadingCard>
-  }
+  if (loading) return <LoadingCard />;
+
+  // Theme-aware classes
+  const wrapperBg = theme === 'dark' ? 'bg-black text-gray-100' : 'bg-gray-100 text-gray-900';
+  const cardBg = theme === 'dark' ? 'bg-gray-950 text-gray-100' : 'bg-white text-gray-900';
+  const subText = theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
+  const chartStroke = theme === 'dark' ? '#374151' : '#E5E7EB'; // grid lines color
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-8 relative min-h-screen">
+    <div className={`${wrapperBg} p-4 bg-black sm:p-6 max-w-7xl mx-auto space-y-8 relative min-h-screen`}>
       {latestUser && (
-        <div className="absolute top-4 left-4 bg-white shadow-sm rounded-2xl p-4 flex items-center gap-4 z-10">
+        <div className={`${cardBg} absolute top-4 left-4 shadow-sm rounded-2xl p-4 flex items-center gap-4 z-10`}>
           <img
             src={latestUser.photo}
             alt={latestUser.name}
@@ -91,16 +96,16 @@ const MainDashboard = () => {
           <div>
             <p className="text-lg font-semibold">{latestUser.name}</p>
             <p className="text-sm text-gray-500 capitalize">{latestUser.role}</p>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm">
               {latestUser.isVerified ? (
                 <>
                   <MdVerified className="text-green-500 text-xl" />
-                  <span>Verified</span>
+                  <span className={subText}>Verified</span>
                 </>
               ) : (
                 <>
                   <MdClose className="text-red-500 text-xl" />
-                  <span>Not Verified</span>
+                  <span className={subText}>Not Verified</span>
                 </>
               )}
             </div>
@@ -108,7 +113,7 @@ const MainDashboard = () => {
         </div>
       )}
 
-      <h1 className="text-2xl sm:text-3xl font-bold text-center mt-27">
+      <h1 className="text-2xl sm:text-3xl font-bold text-center mt-20">
         Welcome to the Dashboard
       </h1>
 
@@ -130,7 +135,7 @@ const MainDashboard = () => {
           label: 'Pending Approvals',
           value: pendingApprovals
         }].map(({ icon, label, value }) => (
-          <div key={label} className="bg-white rounded-2xl shadow p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 hover:shadow-md transition">
+          <div key={label} className={`${cardBg} rounded-2xl shadow p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 hover:shadow-md transition`}>
             {icon}
             <div className="text-center sm:text-left">
               <h2 className="text-lg sm:text-xl font-semibold">{label}</h2>
@@ -140,16 +145,25 @@ const MainDashboard = () => {
         ))}
       </div>
 
-      <div className="bg-white p-6 sm:p-8 rounded-2xl w-full">
+      <div className={`${cardBg} p-6 sm:p-8 rounded-2xl w-full`}>
         <h2 className="text-xl sm:text-2xl font-semibold text-center mb-6">
           Monthly Summary Overview
         </h2>
         <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
+          <BarChart
+            data={barChartData}
+            margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
+          >
+            <CartesianGrid stroke={chartStroke} strokeDasharray="3 3" />
+            <XAxis dataKey="name" stroke={theme === 'dark' ? '#D1D5DB' : '#374151'} />
+            <YAxis stroke={theme === 'dark' ? '#D1D5DB' : '#374151'} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: theme === 'dark' ? '#1F2937' : '#FFFFFF',
+                color: theme === 'dark' ? '#F9FAFB' : '#111827',
+                borderRadius: '8px',
+              }}
+            />
             <Legend />
             <Bar dataKey="value" fill="#EF4444" barSize={40} radius={[6, 6, 0, 0]} />
           </BarChart>
