@@ -40,7 +40,7 @@ const DashboardLayout = () => {
   const drawerOverlayBg = theme === 'dark' ? 'bg-black/70' : 'bg-black/30';
 
   return (
-    <div className={`drawer  lg:drawer-open ${theme === 'dark' ? 'bg-black text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
+    <div  className={`drawer  lg:drawer-open ${theme === 'dark' ? 'bg-black text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
       <input id="dashboard-drawer" type="checkbox" className="drawer-toggle" />
       
       {/* Content Area */}
@@ -153,3 +153,6 @@ const DashboardLayout = () => {
 };
 
 export default DashboardLayout;
+
+
+

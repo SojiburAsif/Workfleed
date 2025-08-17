@@ -5,9 +5,9 @@ import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
-import team1 from '../../assets/Banner/pexels-darlene-alderson-7970815.jpg';
-import team2 from '../../assets/Banner/pexels-serpstat-177219-572056.jpg';
-import team3 from '../../assets/Banner/pexels-darlene-alderson-7970815.jpg'; // Placeholder, change as needed
+// import team1 from '../../assets/Banner/pexels-darlene-alderson-7970815.jpg';
+// import team2 from '../../assets/Banner/pexels-serpstat-177219-572056.jpg';
+// import team3 from '../../assets/Banner/pexels-darlene-alderson-7970815.jpg'; // Placeholder, change as needed
 
 // Slide data
 const slides = [
@@ -16,28 +16,28 @@ const slides = [
     keywords: ['Employee Management', 'Task Tracking', 'Role Assignment'],
     description:
       'Easily manage your workforce with WorkFleet’s real-time dashboard, automated workflows, and secure access control.',
-    image: team1,
+   
   },
   {
     title: 'Organize Tasks Smartly through',
     keywords: ['Deadline Tracking', 'Task Prioritization', 'Smart Notifications'],
     description:
       'Track tasks from start to finish, prioritize workloads, and keep everyone on the same page with smart reminders.',
-    image: team2,
+    
   },
   {
     title: 'Simplify HR Workflows using',
     keywords: ['Performance Metrics', 'Payroll Management', 'Employee Insights'],
     description:
       'Let WorkFleet handle routine HR tasks while you focus on growing your business with actionable data insights.',
-    image: team3,
+    
   },
 ];
 
 const Banner = () => {
   return (
-    <div id='home' className="w-full px-4 ">
-      <div className="max-w-full mx-auto mt-3 ">
+    <div id='home' className="w-full  ">
+      <div className="max-w-full mx-auto  ">
         <Swiper
           modules={[Autoplay, Pagination]}
           autoplay={{ delay: 4000 }}

@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { FaFacebookF, FaTwitter, FaLinkedinIn, FaEnvelope } from 'react-icons/fa';
 import { HiArrowLongRight, HiDocumentText, HiOutlineHome, HiOutlineTag } from 'react-icons/hi2';
 import { FiArrowUp } from 'react-icons/fi';
-import { Link } from 'react-router'; // <-- use react-router-dom
+import { Link } from 'react-router'; // <-- correct import
 import Logo from '../Shared/Logo';
 import { ThemeContext } from '../../Theme/ThemeProvider';
 
@@ -10,17 +10,17 @@ const Footer = () => {
   const { theme } = useContext(ThemeContext);
 
   // Theme-based classes
-  const bgClass = theme === 'dark' ? 'bg-black text-gray-200' : 'bg-black text-gray-200';
-  const textGray = 'text-gray-400';
-  const accentColor = 'text-red-400';
+  const bgClass = theme === 'dark' ? 'bg-gray-900 text-gray-200' : 'bg-black text-gray-200';
+  const textGray = theme === 'dark' ? 'text-gray-400' : 'text-gray-400';
+  const accentColor = theme === 'dark' ? 'text-red-400' : 'text-red-400';
   const accentHover = 'hover:text-red-500';
-  const borderColor = 'border-gray-700';
+  const borderColor = theme === 'dark' ? 'border-gray-700' : 'border-gray-700';
 
   return (
     <footer className={`${bgClass} py-12 border-t ${borderColor} relative`}>
-      <div className="max-w-7xl px-8 mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Website Name Centered */}
-        <div className="mb-6 text-center">
+        <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold flex justify-center items-center space-x-3">
             <Logo />
           </h1>
@@ -29,7 +29,7 @@ const Footer = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
           {/* Terms & About Section */}
           <div className="flex flex-col gap-6">
             <Link
@@ -44,7 +44,7 @@ const Footer = () => {
               <h3 className="text-xl font-semibold flex items-center gap-2">
                 About Us <HiArrowLongRight className="w-5 h-5 text-red-500" />
               </h3>
-              <p className="text-gray-600">
+              <p className={textGray}>
                 We provide smart HR and employee management software designed to boost productivity and streamline your business operations.
               </p>
 
@@ -61,13 +61,12 @@ const Footer = () => {
           {/* Quick Links */}
           <div>
             <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2  w-34">
+            <ul className="space-y-2">
               <li>
                 <a href="#how-it-works" className={`flex items-center gap-2 transition ${accentHover}`}>
                   <HiOutlineTag className={accentColor} /> Features
                 </a>
               </li>
-             
               <li>
                 <Link to="/about" className={`flex items-center gap-2 transition ${accentHover}`}>
                   <HiOutlineHome className={accentColor} /> About
@@ -89,7 +88,7 @@ const Footer = () => {
           {/* Contact & Social */}
           <div>
             <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
-            <p className={textGray + " mb-4"}>web.asif@gmail.com</p>
+            <p className={`${textGray} mb-4`}>web.asif@gmail.com</p>
             <div className={`flex space-x-4 mb-6 ${accentColor}`}>
               <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer" className={`${accentHover} transition`}>
                 <FaFacebookF size={20} />
@@ -100,7 +99,7 @@ const Footer = () => {
               <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className={`${accentHover} transition`}>
                 <FaLinkedinIn size={20} />
               </a>
-              <a href="asif81534@gmail.com" aria-label="Email" className={`${accentHover} transition`}>
+              <a href="mailto:asif81534@gmail.com" aria-label="Email" className={`${accentHover} transition`}>
                 <FaEnvelope size={20} />
               </a>
             </div>
@@ -110,7 +109,11 @@ const Footer = () => {
                 type="email"
                 placeholder="Your email address"
                 required
-                className="flex-grow px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-900 border-gray-700 text-gray-300"
+                className={`flex-grow px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                }`}
               />
               <button
                 type="submit"
@@ -120,7 +123,7 @@ const Footer = () => {
               </button>
             </form>
 
-            <p className="text-gray-500 text-sm italic mt-4">
+            <p className={`${textGray} text-sm italic mt-4`}>
               Have questions or need support? Our team is here to help you succeed. Reach out anytime!
             </p>
           </div>

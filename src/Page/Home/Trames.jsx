@@ -97,7 +97,6 @@ respond to queries as quickly as possible.`
   }
 ];
 
-
 const Trames = () => {
   const { theme } = useContext(ThemeContext);
   const [openId, setOpenId] = useState(null);
@@ -116,12 +115,21 @@ const Trames = () => {
       ? 'inline-flex items-center gap-2 px-3 py-2 rounded-md bg-gray-800 text-gray-200 border border-gray-700'
       : 'inline-flex items-center gap-2 px-3 py-2 rounded-md bg-white text-gray-900 border border-gray-200';
 
+  // Robust back handler
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate('/register'); // fallback route
+    }
+  };
+
   return (
     <main className={`${bgClass} min-h-screen py-16 px-4 sm:px-6 lg:px-20`}>
       <div className="max-w-7xl mx-auto">
         {/* Top: Back button + Header */}
         <div className="mb-6 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className={backBtnClass} aria-label="Go back">
+          <button onClick={handleBack} className={backBtnClass} aria-label="Go back">
             <FiArrowLeft /> Back
           </button>
 
@@ -167,7 +175,6 @@ const Trames = () => {
 
         <footer className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className={`${muted} text-sm`}>Last updated: <strong>Aug 16, 2025</strong></p>
-          
         </footer>
       </div>
     </main>

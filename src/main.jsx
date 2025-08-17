@@ -13,7 +13,7 @@ const queryClient = new QueryClient();
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>
-      <div className="font-Tektur">
+      <div className="font-Tektur ">
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <RouterProvider router={router} />
