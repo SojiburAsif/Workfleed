@@ -17,12 +17,11 @@ const ReviewSection = () => {
   const [loading, setLoading] = useState(false);
   const [expandedIds, setExpandedIds] = useState(new Set());
   const [showAll, setShowAll] = useState(false);
-  const [fetching, setFetching] = useState(true); // spinner state
+  const [fetching, setFetching] = useState(true);
 
   const placeholderAvatar = 'https://i.pravatar.cc/100?img=10';
   const COLLAPSE_COUNT = 6;
 
-  // fetch reviews
   useEffect(() => {
     let mounted = true;
     const fetchReviews = async () => {
@@ -93,20 +92,19 @@ const ReviewSection = () => {
   const fadeInUpVariant = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
   const visibleReviews = showAll ? sorted : sorted.slice(0, COLLAPSE_COUNT - 1);
 
-  // theme based classes
   const sectionBg = theme === 'dark' ? 'bg-black text-gray-200' : 'bg-gray-50 text-gray-800';
   const cardBg = theme === 'dark' ? 'bg-gray-950 text-gray-200 shadow-gray-700' : 'bg-white text-gray-800 shadow-md';
   const inputBg = theme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-gray-100 text-gray-800';
   const borderColor = theme === 'dark' ? 'border-gray-700' : 'border-gray-200';
 
   return (
-    <section className={`${sectionBg} py-16 px-5`}>
-      <div className="max-w-7xl mx-auto px-12">
+    <section className={`${sectionBg} py-16 px-4 sm:px-6 lg:px-20`}>
+      <div className="max-w-7xl mx-auto px-2 sm:px-12">
         {/* header */}
         <div className="text-center mb-8">
           <h3 className="text-sm font-semibold uppercase tracking-widest text-red-500">User Feedback</h3>
           <h2 className="text-2xl md:text-3xl font-bold mt-2">What People Are Saying</h2>
-          <div className="mt-3 flex items-center justify-center gap-4">
+          <div className="mt-3 flex items-center justify-center gap-4 flex-wrap">
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-red-500">{avgRating}</span>
               <div className="flex items-center">
@@ -130,14 +128,14 @@ const ReviewSection = () => {
             No reviews yet. Be the first to leave a review!
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mx-auto">
+          <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mx-auto">
             {/* Add Review Form */}
             <motion.div
               key="form-card"
               variants={fadeInUpVariant}
               initial="hidden"
               whileInView="visible"
-              className={`${cardBg} rounded-2xl p-6 border-t-4 border-red-500 flex flex-col justify-between overflow-hidden min-h-[18rem]`}
+              className={`${cardBg} rounded-2xl p-4 sm:p-6 border-t-4 border-red-500 flex flex-col justify-between overflow-hidden min-h-[18rem]`}
             >
               <div>
                 <h4 className="text-lg font-semibold mb-2">Share Your Experience</h4>
@@ -155,7 +153,7 @@ const ReviewSection = () => {
                   className={`w-full mb-2 p-2 rounded resize-none h-18 focus:outline-none ${inputBg}`}
                   maxLength={500}
                 />
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap">
                   <div className="flex items-center gap-1">
                     {Array.from({ length: 5 }).map((_, i) => {
                       const rIdx = i + 1;
@@ -176,7 +174,7 @@ const ReviewSection = () => {
                   <div className="text-xs text-gray-400">{newReview.content.length}/500</div>
                 </div>
               </div>
-              <div className="flex items-center justify-between gap-2 mt-3">
+              <div className="flex items-center justify-between gap-2 mt-3 flex-wrap">
                 <div className="flex items-center gap-2">
                   <div className="text-sm text-gray-400">Preview</div>
                   <div className={`px-3 py-1 rounded text-sm shadow ${theme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-gray-50 text-gray-700'}`}>
@@ -208,15 +206,15 @@ const ReviewSection = () => {
                   initial="hidden"
                   whileInView="visible"
                   transition={{ delay: idx * 0.04 }}
-                  className={`${cardBg} rounded-2xl p-5 border-t-4 border-red-500 flex flex-col justify-between overflow-hidden min-h-[18rem]`}
+                  className={`${cardBg} rounded-2xl p-4 sm:p-5 border-t-4 border-red-500 flex flex-col justify-between overflow-hidden min-h-[18rem]`}
                 >
                   <div className="flex flex-col">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <img
-                          src={review.photo || avatar}
+                          src={avatar}
                           alt={review.name || 'avatar'}
-                          className="w-11 h-11 rounded-full object-cover border"
+                          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border"
                           style={{ borderColor: '#f87171' }}
                         />
                         <div>

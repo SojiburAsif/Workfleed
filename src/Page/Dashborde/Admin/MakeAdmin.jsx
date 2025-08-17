@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import UseAxios from '../../../Hooks/UseAxios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import moment from 'moment';
 import Swal from 'sweetalert2';
 import UseAuth from '../../../Hooks/UseAuth';
 import { FaSearch, FaUserShield } from 'react-icons/fa';
+import { MdAdminPanelSettings } from 'react-icons/md';
 import LoadingCard from '../../Shared/LoadingCard';
+import { ThemeContext } from '../../../Theme/ThemeProvider';
 
 const MakeAdmin = () => {
   const axiosSecure = UseAxios();
   const queryClient = useQueryClient();
   const { user: currentUser } = UseAuth();
+  const { theme } = useContext(ThemeContext);
   const [searchText, setSearchText] = useState('');
 
   const { data: users = [], isLoading, isError, error } = useQuery({
@@ -25,9 +28,7 @@ const MakeAdmin = () => {
     mutationFn: async ({ id, role }) => {
       return await axiosSecure.patch(`/users/${id}/role`, { role });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['users']);
-    },
+    onSuccess: () => queryClient.invalidateQueries(['users']),
   });
 
   const handleRoleChange = async (id, currentRole, name, email) => {
@@ -67,39 +68,52 @@ const MakeAdmin = () => {
     .filter(u => !u.fired)
     .filter(u => {
       const txt = searchText.toLowerCase();
-      return (
-        u.name?.toLowerCase().includes(txt) ||
-        u.email?.toLowerCase().includes(txt)
-      );
+      return u.name?.toLowerCase().includes(txt) || u.email?.toLowerCase().includes(txt);
     });
 
   if (isLoading) return <LoadingCard />;
   if (isError) return <p className="text-center mt-10 text-red-600 text-lg">{error.message}</p>;
 
+  // Theme Classes
+  const bgClass = theme === 'dark' ? 'bg-gray-950 text-white' : 'bg-gray-50 text-gray-900';
+  const inputClass = theme === 'dark'
+    ? 'bg-gray-800 text-white border-gray-600 placeholder-gray-400 focus:ring-red-500'
+    : 'bg-gray-200 text-black border-gray-300 placeholder-gray-500 focus:ring-red-500';
+  const tableHeaderClass = theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-red-100 text-red-700';
+  const tableRowClass = theme === 'dark' ? 'bg-gray-950 text-white hover:bg-gray-900' : 'bg-white text-black hover:bg-red-50';
+  const cardClass = theme === 'dark' ? 'bg-gray-950 text-white border-gray-700' : 'bg-white text-black border-gray-200';
+  const buttonAdmin = isUpdating ? 'opacity-50 cursor-not-allowed' : '';
+
   return (
-    <section className="w-full mx-auto p-4 sm:p-8">
-      <h1 className="text-3xl font-bold mb-6 text-center text-red-600 drop-shadow">
-        Admin Panel – Promote / Remove Admin
-      </h1>
+    <section className={`w-full mx-auto p-4 sm:p-8 ${bgClass} min-h-screen`}>
+      {/* Title */}
+      <div className="flex items-center justify-center gap-3 mb-8">
+        <MdAdminPanelSettings className="text-red-600 text-3xl" />
+        <h1 className="text-3xl font-bold text-center drop-shadow">
+          Admin Panel – Promote / Remove Admin
+        </h1>
+      </div>
 
       {/* Search */}
       <div className="mb-6 flex justify-center">
         <div className="relative w-full max-w-xl">
-          <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
+          <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2
+           text-gray-400 text-lg" />
           <input
             type="text"
             placeholder="Search by name or email…"
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
-            className="w-full pl-12 pr-5 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm"
+            className={`w-full pl-12 pr-5 py-3 text-base rounded-sm focus:outline-none focus:ring-2  ${inputClass}`}
           />
         </div>
       </div>
 
       {/* Desktop Table */}
-      <div className="hidden sm:block overflow-x-auto border rounded shadow-sm">
-        <table className="min-w-full text-sm text-left divide-y divide-gray-200">
-          <thead className="bg-red-100 text-red-700 text-sm font-semibold uppercase">
+      <div className="hidden sm:block overflow-x-auto  ">
+        <table className="min-w-full text-sm text-left border
+         border-gray-600 divide-y divide-gray-200">
+          <thead className={tableHeaderClass}>
             <tr>
               <th className="px-4 py-3">Photo</th>
               <th className="px-6 py-3">Name</th>
@@ -109,24 +123,23 @@ const MakeAdmin = () => {
               <th className="px-6 py-3 text-center">Action</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
+          <tbody>
             {filteredUsers.map(user => {
               const isAdmin = user.role.toLowerCase() === 'admin';
               const roleLabel = user.role.charAt(0).toUpperCase() + user.role.slice(1);
-
               return (
-                <tr key={user._id} className="hover:bg-red-50">
+                <tr key={user._id} className={`${tableRowClass}`}>
                   <td className="px-4 py-3">
                     <img
                       src={user.photo || 'https://via.placeholder.com/40'}
                       alt={user.name || 'User'}
-                      className="w-10 h-10 rounded-full object-cover border"
+                      className="w-10 h-10 rounded-full object-cover border border-red-500"
                     />
                   </td>
                   <td className="px-6 py-3 font-medium">{user.name || 'N/A'}</td>
                   <td className="px-6 py-3">{user.email || 'N/A'}</td>
                   <td className="px-4 py-3">
-                    <span className="badge badge-outline badge-secondary">{roleLabel}</span>
+                    <span className="badge badge-outline badge-error">{roleLabel}</span>
                   </td>
                   <td className="px-4 py-3">
                     {user.registeredAt ? moment(user.registeredAt).format('MMM D, YYYY') : 'N/A'}
@@ -137,11 +150,9 @@ const MakeAdmin = () => {
                         onClick={() =>
                           handleRoleChange(user._id, user.role, user.name, user.email)
                         }
-                        className={`px-4 py-2 rounded-md transition disabled:opacity-50 ${
-                          isAdmin
-                            ? 'bg-gray-500 hover:bg-gray-600 text-white'
-                            : 'bg-red-600 hover:bg-red-700 text-white'
-                        }`}
+                        className={`px-4 py-2 rounded-sm transition ${isAdmin
+                          ? 'bg-gray-500 hover:bg-gray-600 text-white'
+                          : 'bg-red-600 hover:bg-red-700 text-white'} ${buttonAdmin}`}
                         disabled={isUpdating}
                       >
                         {isAdmin ? 'Remove Admin' : 'Make Admin'}
@@ -162,12 +173,8 @@ const MakeAdmin = () => {
         {filteredUsers.map(user => {
           const isAdmin = user.role.toLowerCase() === 'admin';
           const roleLabel = user.role.charAt(0).toUpperCase() + user.role.slice(1);
-
           return (
-            <div
-              key={user._id}
-              className="bg-white p-4 rounded-lg shadow border border-gray-200"
-            >
+            <div key={user._id} className={`p-4 rounded-lg shadow border ${cardClass}`}>
               <div className="flex items-center gap-4 mb-3">
                 <img
                   src={user.photo || 'https://via.placeholder.com/40'}
@@ -176,26 +183,23 @@ const MakeAdmin = () => {
                 />
                 <div>
                   <h3 className="text-lg font-semibold text-red-600">{user.name || 'N/A'}</h3>
-                  <p className="text-sm text-gray-700">{user.email || 'N/A'}</p>
+                  <p className="text-sm text-gray-400">{user.email || 'N/A'}</p>
                 </div>
               </div>
               <p className="text-sm mb-1">
                 <strong>Role:</strong> {roleLabel}
               </p>
               <p className="text-sm mb-2">
-                <strong>Joined:</strong>{' '}
-                {user.registeredAt ? moment(user.registeredAt).format('MMM D, YYYY') : 'N/A'}
+                <strong>Joined:</strong> {user.registeredAt ? moment(user.registeredAt).format('MMM D, YYYY') : 'N/A'}
               </p>
               {user.isVerified ? (
                 <button
                   onClick={() =>
                     handleRoleChange(user._id, user.role, user.name, user.email)
                   }
-                  className={`w-full py-2 mt-2 rounded-md text-white text-sm font-semibold transition ${
-                    isAdmin
-                      ? 'bg-gray-500 hover:bg-gray-600'
-                      : 'bg-red-600 hover:bg-red-700'
-                  }`}
+                  className={`w-full py-2 mt-2 rounded-md text-white text-sm font-semibold transition ${isAdmin
+                    ? 'bg-gray-500 hover:bg-gray-600'
+                    : 'bg-red-600 hover:bg-red-700'} ${buttonAdmin}`}
                   disabled={isUpdating}
                 >
                   {isAdmin ? 'Remove Admin' : 'Make Admin'}

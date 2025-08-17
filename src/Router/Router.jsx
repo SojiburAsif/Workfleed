@@ -24,6 +24,7 @@ import PayEmploy from "../Page/Dashborde/Employe/PayEmploy";
 import Trames from "../Page/Home/Trames";
 import About from "../Page/Home/About";
 import Privacy from "../Page/Home/Privacy";
+import ReviewsPage from "../Page/Dashborde/Main/Review/Review";
 
 
 export const router = createBrowserRouter([
@@ -96,6 +97,10 @@ export const router = createBrowserRouter([
       {
         path: 'contact-us',
         element: <Contact></Contact>
+      },
+      {
+        path:"reviews",
+        element:<ReviewsPage></ReviewsPage>
       }
     ],
   },

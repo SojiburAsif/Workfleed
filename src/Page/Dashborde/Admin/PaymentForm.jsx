@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import UseAxios from '../../../Hooks/UseAxios';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router';
+import { ThemeContext } from '../../../Theme/ThemeProvider';
 
 const PaymentForm = ({ salary, payrollId, clientSecret }) => {
   const stripe = useStripe();
   const elements = useElements();
   const axiosSecure = UseAxios();
   const navigate = useNavigate();
+  const { theme } = useContext(ThemeContext); // ThemeContext
 
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -83,14 +85,21 @@ const PaymentForm = ({ salary, payrollId, clientSecret }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 max-w-xl mx-auto p-6 bg-white rounded-lg border border-gray-200">
+    <form
+      onSubmit={handleSubmit}
+      className={`mt-6 max-w-xl mx-auto p-6 transition-colors duration-300 ${
+        theme === 'dark'
+          ? 'bg-gray-950 border-gray-700 text-gray-200'
+          : 'bg-white border-gray-200 text-gray-800'
+      }`}
+    >
       <CardElement
         options={{
           style: {
             base: {
               fontSize: '16px',
-              color: '#32325d',
-              '::placeholder': { color: '#a0aec0' },
+              color: theme === 'dark' ? '#E5E7EB' : '#32325d',
+              '::placeholder': { color: theme === 'dark' ? '#9CA3AF' : '#a0aec0' },
               fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
               padding: '10px',
             },
@@ -106,7 +115,9 @@ const PaymentForm = ({ salary, payrollId, clientSecret }) => {
         type="submit"
         disabled={!stripe || processing}
         className={`mt-6 w-full py-3 rounded-md text-white font-semibold transition-colors duration-300 ${
-          processing ? 'bg-red-300 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
+          processing
+            ? 'bg-red-300 cursor-not-allowed'
+            : 'bg-red-600 hover:bg-red-700'
         }`}
       >
         {processing ? 'Processing...' : `Pay ৳${salary}`}

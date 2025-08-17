@@ -110,7 +110,7 @@ const FeatureSection = () => {
   const { theme } = useContext(ThemeContext);
   const [activeFeature, setActiveFeature] = useState(null);
 
-  const wrapperBg = theme === 'dark' ? 'bg-gray-black text-gray-100' : 'bg-white text-gray-900';
+  const wrapperBg = theme === 'dark' ? 'bg-black text-gray-100' : 'bg-white text-gray-900';
   const cardBase = theme === 'dark'
     ? 'bg-gray-950 border border-gray-800 text-gray-100'
     : 'bg-white border border-gray-200 text-gray-900';
@@ -118,23 +118,23 @@ const FeatureSection = () => {
   const modalBg = theme === 'dark' ? 'bg-gray-950 text-gray-100' : 'bg-white text-gray-900';
 
   return (
-    <section className={`${wrapperBg} py-14 px-6 lg:px-20`}>
+    <section className={`${wrapperBg} py-14 px-4 sm:px-6 lg:px-20`}>
       <div className="max-w-7xl mx-auto text-center mb-12">
         <FaStar className="text-red-600 dark:text-red-400 w-10 h-10 mx-auto mb-4" />
-        <h2 className={`text-4xl font-extrabold flex items-center justify-center gap-3 mb-3`}>
+        <h2 className={`text-3xl sm:text-4xl font-extrabold flex items-center justify-center gap-3 mb-3`}>
           <FaCalendarCheck className="text-red-600 dark:text-red-400 w-8 h-8" />
           Our Core Features
         </h2>
-        <p className={`text-lg max-w-2xl mx-auto ${subText}`}>
+        <p className={`text-base sm:text-lg max-w-2xl mx-auto ${subText}`}>
           Essential tools and professional support your teams need to deliver outstanding results.
         </p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-11  grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto md:px-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
         {FEATURES.map((feature) => (
           <motion.div
             key={feature.id}
-            className={`${cardBase} rounded-2xl p-8  flex flex-col justify-between h-full cursor-pointer shadow-sm`}
+            className={`${cardBase} rounded-2xl p-6 sm:p-8 flex flex-col justify-between h-full cursor-pointer shadow-sm`}
             whileHover={{ scale: 1.03, boxShadow: '0 12px 30px rgba(239,68,68,0.15)' }}
             onClick={() => setActiveFeature(feature)}
             initial={{ opacity: 0, y: 10 }}
@@ -144,12 +144,12 @@ const FeatureSection = () => {
           >
             <div className="flex flex-col items-center text-center gap-4">
               <div>{feature.icon}</div>
-              <h3 className="text-xl font-semibold">{feature.title}</h3>
-              <p className={`text-sm ${subText}`}>{feature.short}</p>
+              <h3 className="text-lg sm:text-xl font-semibold">{feature.title}</h3>
+              <p className={`text-sm sm:text-base ${subText}`}>{feature.short}</p>
             </div>
 
             <button
-              className="mt-6 inline-flex items-center gap-2 text-red-600 dark:text-red-400 font-medium hover:underline"
+              className="mt-4 sm:mt-6 inline-flex items-center gap-2 text-red-600 dark:text-red-400 font-medium hover:underline text-sm sm:text-base"
               onClick={(e) => { e.stopPropagation(); setActiveFeature(feature); }}
             >
               Learn More
@@ -162,19 +162,19 @@ const FeatureSection = () => {
       <AnimatePresence>
         {activeFeature && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setActiveFeature(null)}
           >
             <motion.div
-              className={`${modalBg} rounded-3xl w-full max-w-2xl p-8 relative shadow-2xl`}
+              className={`${modalBg} rounded-3xl w-full max-w-md sm:max-w-2xl p-6 sm:p-8 relative shadow-2xl overflow-y-auto max-h-[90vh]`}
               initial={{ y: -30, scale: 0.96, opacity: 0 }}
               animate={{ y: 0, scale: 1, opacity: 1 }}
               exit={{ y: 30, scale: 0.96, opacity: 0 }}
               transition={{ duration: 0.35 }}
-              onClick={(e) => e.stopPropagation()} // prevent modal close when clicking inside
+              onClick={(e) => e.stopPropagation()} 
             >
               <button
                 onClick={() => setActiveFeature(null)}
@@ -185,13 +185,15 @@ const FeatureSection = () => {
 
               <div className="flex flex-col items-center gap-4">
                 <div>{activeFeature.icon}</div>
-                <h3 className="text-2xl font-bold">{activeFeature.title}</h3>
-                <p className={`text-sm ${subText} text-center max-w-xl`}>{activeFeature.short}</p>
+                <h3 className="text-xl sm:text-2xl font-bold text-center">{activeFeature.title}</h3>
+                <p className={`text-sm sm:text-base ${subText} text-center max-w-xl`}>
+                  {activeFeature.short}
+                </p>
 
-                <ul className="mt-4 space-y-2 text-left w-full max-w-xl">
+                <ul className="mt-4 space-y-2 text-left w-full max-w-xl px-2 sm:px-0">
                   {activeFeature.details.map((line, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      <FaCheckCircle className="mt-1 text-red-600 dark:text-red-400" />
+                      <FaCheckCircle className="mt-1 text-red-600 dark:text-red-400 flex-shrink-0" />
                       <span className={subText}>{line}</span>
                     </li>
                   ))}

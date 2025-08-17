@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Swal from 'sweetalert2';
 import UseAxios from '../../../Hooks/UseAxios';
 import {
@@ -6,10 +6,13 @@ import {
   FaBriefcase,
   FaUserShield,
   FaMoneyBillWave,
+  FaUsers
 } from 'react-icons/fa';
 import LoadingCard from '../../Shared/LoadingCard';
+import { ThemeContext } from '../../../Theme/ThemeProvider';
 
 const AllEmployeeList = () => {
+  const { theme } = useContext(ThemeContext); // light or dark
   const axiosSecure = UseAxios();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +20,7 @@ const AllEmployeeList = () => {
   const [newSalary, setNewSalary] = useState('');
   const [viewMode, setViewMode] = useState('table');
 
+  // Fetch employees
   useEffect(() => {
     axiosSecure
       .get('/users?verified=true')
@@ -25,12 +29,14 @@ const AllEmployeeList = () => {
       .finally(() => setLoading(false));
   }, [axiosSecure]);
 
+  // Update local state for employee changes
   const updateEmployeeInState = (id, updatedFields) => {
     setEmployees(prev =>
       prev.map(emp => (emp._id === id ? { ...emp, ...updatedFields } : emp))
     );
   };
 
+  // Handlers for role change
   const handleMakeHR = emp => {
     Swal.fire({
       title: `Make ${emp.name} an HR?`,
@@ -68,6 +74,7 @@ const AllEmployeeList = () => {
     });
   };
 
+  // Salary adjustment
   const handleSalaryAdjust = () => {
     const salary = parseFloat(newSalary);
     if (isNaN(salary) || salary <= editingEmp.salary) {
@@ -83,6 +90,7 @@ const AllEmployeeList = () => {
       .catch(() => Swal.fire('Error', 'Failed to update salary.', 'error'));
   };
 
+  // Fire / Unfire employee
   const handleFire = emp => {
     Swal.fire({
       title: `Fire ${emp.name}?`,
@@ -123,13 +131,24 @@ const AllEmployeeList = () => {
 
   if (loading) return <LoadingCard />;
 
+  // Theme Classes
+  const bgClass = theme === 'dark' ? 'bg-black text-white' : 'bg-gray-50 text-black';
+  const cardClass = theme === 'dark' ? 'bg-gray-950 text-white border border-gray-700' : 'bg-white text-black border border-gray-200';
+  const tableHeaderClass = theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-black';
+  const modalClass = theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-black';
+  const btnClass = theme === 'dark' ? 'btn bg-red-600 text-white hover:bg-red-700' : 'btn bg-red-600 text-white hover:bg-red-700';
+
+  const filteredEmployees = employees.filter(emp => emp.role !== 'admin');
+
   return (
-    <section className="p-8">
+    <section className={`p-12 min-h-screen ${bgClass}`}>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-4xl font-bold text-black">All Verified Employees</h2>
+        <h2 className="text-4xl text-red-500 font-bold flex items-center gap-2">
+          <FaUsers /> All Verified Employees
+        </h2>
         <button
           onClick={() => setViewMode(vm => (vm === 'table' ? 'grid' : 'table'))}
-          className="btn bg-red-600 hover:bg-red-700 text-white"
+          className={btnClass}
         >
           {viewMode === 'table' ? 'Card View' : 'Table View'}
         </button>
@@ -137,8 +156,8 @@ const AllEmployeeList = () => {
 
       {viewMode === 'table' ? (
         <div className="overflow-x-auto">
-          <table className="table table-zebra w-full">
-            <thead className="bg-gray-100">
+          <table className="table w-full">
+            <thead className={tableHeaderClass}>
               <tr>
                 <th>Name</th>
                 <th>Designation</th>
@@ -150,15 +169,13 @@ const AllEmployeeList = () => {
               </tr>
             </thead>
             <tbody>
-              {employees.map(emp => (
-                <tr key={emp._id} className={`${emp.fired ? 'bg-red-50 text-red-800' : 'text-black'}`}>
+              {filteredEmployees.map(emp => (
+                <tr key={emp._id} className={`${emp.fired ? (theme==='dark'?'bg-red-900 text-red-300':'bg-red-50 text-red-800') : ''}`}>
                   <td>{emp.name}</td>
                   <td>{emp.designation || '-'}</td>
                   <td>
                     {emp.fired ? (
                       <span className="italic text-red-600">Fired</span>
-                    ) : emp.role === 'admin' ? (
-                      <span className="badge badge-outline badge-error text-black">Admin</span>
                     ) : emp.role === 'HR' ? (
                       <span className="badge badge-outline badge-warning text-black">HR</span>
                     ) : (
@@ -167,26 +184,24 @@ const AllEmployeeList = () => {
                   </td>
                   <td>৳{emp.salary}</td>
                   <td className="text-center">
-                    {!emp.fired && emp.role !== 'admin' ? (
+                    {!emp.fired && (
                       emp.role === 'HR' ? (
-                        <button onClick={() => handleMakeEmployee(emp)} className="btn btn-sm px-6 py-2 bg-black text-white">Employee</button>
+                        <button onClick={() => handleMakeEmployee(emp)} className="btn btn-sm px-6 py-2 bg-gray-700 text-white">Employee</button>
                       ) : (
                         <button onClick={() => handleMakeHR(emp)} className="btn btn-sm px-6 py-2 bg-red-600 text-white">HR</button>
                       )
-                    ) : (<span className="italic text-gray-500">N/A</span>)}
+                    )}
                   </td>
                   <td className="text-center">
-                    {!emp.fired && emp.role !== 'admin' ? (
+                    {!emp.fired && (
                       <button onClick={() => { setEditingEmp(emp); setNewSalary(emp.salary); }} className="btn btn-sm bg-red-600 text-white">Adjust</button>
-                    ) : (<span className="italic text-gray-500">N/A</span>)}
+                    )}
                   </td>
                   <td className="text-center">
-                    {emp.role !== 'admin' && (
-                      emp.fired ? (
-                        <button onClick={() => handleUnfire(emp)} className="btn btn-sm bg-green-600 text-white">Unfire</button>
-                      ) : (
-                        <button onClick={() => handleFire(emp)} className="btn btn-sm bg-red-600 text-white">Fire</button>
-                      )
+                    {emp.fired ? (
+                      <button onClick={() => handleUnfire(emp)} className="btn btn-sm bg-green-600 text-white">Unfire</button>
+                    ) : (
+                      <button onClick={() => handleFire(emp)} className="btn btn-sm bg-red-600 text-white">Fire</button>
                     )}
                   </td>
                 </tr>
@@ -196,29 +211,23 @@ const AllEmployeeList = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {employees.map(emp => (
-            <div key={emp._id} className={`border rounded-lg p-6 shadow-md ${emp.fired ? 'bg-red-50 text-red-800' : 'bg-white text-black'}`}>
+          {filteredEmployees.map(emp => (
+            <div key={emp._id} className={`border rounded-lg p-6 shadow-md ${emp.fired ? (theme==='dark'?'bg-red-900 text-red-300':'bg-red-50 text-red-800') : cardClass}`}>
               <h3 className="text-2xl font-semibold mb-4 border-b pb-2 flex items-center gap-2">
                 <FaUser /> {emp.name}
               </h3>
-              <p className="mb-3 flex items-center gap-2"><FaBriefcase className="text-red-600" /><strong>Designation:</strong> {emp.designation || '-'}</p>
-              <p className="mb-3 flex items-center gap-2"><FaUserShield className="text-red-600" /><strong>Role:</strong> {emp.fired ? 'Fired' : emp.role}</p>
-              <p className="mb-4 flex items-center gap-2"><FaMoneyBillWave className="text-red-600" /><strong>Salary:</strong> ৳{emp.salary}</p>
-              {emp.role !== 'admin' && (
+              <p className="mb-3 flex items-center gap-2"><FaBriefcase className="text-red-500" /><strong>Designation:</strong> {emp.designation || '-'}</p>
+              <p className="mb-3 flex items-center gap-2"><FaUserShield className="text-red-500" /><strong>Role:</strong> {emp.fired ? 'Fired' : emp.role}</p>
+              <p className="mb-4 flex items-center gap-2"><FaMoneyBillWave className="text-red-500" /><strong>Salary:</strong> ৳{emp.salary}</p>
+              {!emp.fired && (
                 <div className="flex flex-col gap-2">
-                  {emp.fired ? (
-                    <button onClick={() => handleUnfire(emp)} className="btn bg-green-600 text-white">Unfire</button>
+                  {emp.role === 'HR' ? (
+                    <button onClick={() => handleMakeEmployee(emp)} className="btn bg-gray-700 text-white">Make Employee</button>
                   ) : (
-                    <>
-                      {emp.role === 'HR' ? (
-                        <button onClick={() => handleMakeEmployee(emp)} className="btn bg-gray-300 text-black">Make Employee</button>
-                      ) : (
-                        <button onClick={() => handleMakeHR(emp)} className="btn bg-red-600 text-white">Make HR</button>
-                      )}
-                      <button onClick={() => { setEditingEmp(emp); setNewSalary(emp.salary); }} className="btn bg-red-600 text-white">Adjust Salary</button>
-                      <button onClick={() => handleFire(emp)} className="btn bg-red-700 text-white">Fire</button>
-                    </>
+                    <button onClick={() => handleMakeHR(emp)} className="btn bg-red-600 text-white">Make HR</button>
                   )}
+                  <button onClick={() => { setEditingEmp(emp); setNewSalary(emp.salary); }} className="btn bg-red-600 text-white">Adjust Salary</button>
+                  <button onClick={() => handleFire(emp)} className="btn bg-red-700 text-white">Fire</button>
                 </div>
               )}
             </div>
@@ -227,18 +236,18 @@ const AllEmployeeList = () => {
       )}
 
       {editingEmp && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full shadow-lg">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50 p-4">
+          <div className={`p-6 rounded-lg max-w-md w-full shadow-lg ${modalClass}`}>
             <h3 className="text-2xl font-semibold mb-4 text-center">Adjust Salary for {editingEmp.name}</h3>
             <input
               type="number"
-              className="input input-bordered w-full mb-4"
+              className={`input input-bordered w-full mb-4 ${theme==='dark'?'bg-gray-800 text-white border-gray-600':'bg-white text-black border-gray-300'}`}
               value={newSalary}
               onChange={e => setNewSalary(e.target.value)}
               min={editingEmp.salary + 0.01}
             />
             <div className="flex justify-end gap-3">
-              <button onClick={() => setEditingEmp(null)} className="btn btn-outline">Cancel</button>
+              <button onClick={() => setEditingEmp(null)} className="btn btn-outline border-gray-500 text-white hover:bg-gray-700">Cancel</button>
               <button onClick={handleSalaryAdjust} className="btn bg-red-600 text-white">Save</button>
             </div>
           </div>
