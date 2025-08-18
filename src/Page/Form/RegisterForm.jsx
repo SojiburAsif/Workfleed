@@ -1,65 +1,66 @@
 // RegisterForm.js
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { FcGoogle } from 'react-icons/fc';
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import Swal from 'sweetalert2';
 import UseAuth from '../../Hooks/UseAuth';
-import axios from 'axios';
 import useAxiosIns from '../../Hooks/UseAxiosIns';
 import Logo from '../Shared/Logo';
 import { ThemeContext } from '../../Theme/ThemeProvider';
+import LRLoading from '../Shared/LRLoading';
+
+const IMGBB_KEY = '0b8044c43759b62ba2819474237a94de';
 
 const RegisterForm = () => {
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isSubmitting }
+    formState: { errors }
   } = useForm();
 
   const { createUser, googleSignIn, updateUser } = UseAuth();
   const navigate = useNavigate();
   const password = watch('password', '');
 
-  const [uploading, setUploading] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isBusy, setIsBusy] = useState(false);
 
   const axiosSecure = useAxiosIns();
-
   const { theme } = useContext(ThemeContext);
 
-  // THEME CLASSES
-  const pageBg = theme === 'dark' ? 'bg-slate-900' : 'bg-gray-100'; // হালকা হালকা gray
-  const formBg = theme === 'dark' ? 'bg-gray-950 text-gray-100' : 'bg-white text-gray-900'; // light এ text-gray-900
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+
+  const pageBg = theme === 'dark' ? 'bg-slate-900' : 'bg-gray-100';
+  const formBg = theme === 'dark' ? 'bg-gray-950 text-gray-100' : 'bg-white text-gray-900';
   const inputBg = theme === 'dark'
     ? 'bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400'
-    : 'bg-gray-200 text-gray-950 border-gray-300 placeholder-gray-500'; // subtle light bg
-  const labelColor = theme === 'dark' ? 'text-gray-400' : 'text-gray-700'; // light label dark থেকে হালকা
-  const googleBtnHover = theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-200'; // হালকা hover
+    : 'bg-gray-200 text-gray-950 border-gray-300 placeholder-gray-500';
+  const labelColor = theme === 'dark' ? 'text-gray-400' : 'text-gray-700';
+  const googleBtnHover = theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-200';
   const fileBtnStyle = theme === 'dark'
     ? 'file:bg-red-700 file:text-white file:hover:bg-red-600'
-    : 'file:bg-red-100 file:text-red-700 file:hover:bg-red-200'; // subtle file btn
+    : 'file:bg-red-100 file:text-red-700 file:hover:bg-red-200';
 
-  // IMAGE UPLOAD
+  // UPLOAD IMAGE FUNCTION
   const uploadToImgbb = async (base64Image) => {
-    setUploading(true);
     try {
       const formData = new FormData();
-      formData.append('image', base64Image);
-      const response = await axios.post(
-        `https://api.imgbb.com/1/upload?key=0b8044c43759b62ba2819474237a94de`,
-        formData
-      );
-      setUploading(false);
-      return response.data.data.url;
-    } catch (error) {
-      setUploading(false);
-      Swal.fire({ icon: 'error', title: 'Image Upload Failed', text: error.message });
-      throw error;
+      formData.append("image", base64Image);
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+        method: "POST",
+        body: formData
+      });
+      if (!res.ok) throw new Error("Image upload failed");
+      const json = await res.json();
+      return json.data.url;
+    } catch (err) {
+      throw err;
     }
   };
 
@@ -74,35 +75,39 @@ const RegisterForm = () => {
 
   // FORM SUBMIT
   const onSubmit = async (data) => {
-    if (!data.photo || data.photo.length === 0) {
-      Swal.fire({ icon: 'error', title: 'Profile picture is required' });
-      return;
-    }
-    const file = data.photo[0];
-    if (file.size > 2 * 1024 * 1024) {
-      Swal.fire({ icon: 'error', title: 'Image size must be less than 2MB' });
-      return;
-    }
-
-    const uppercaseReg = /[A-Z]/;
-    const specialCharReg = /[!@#$%^&*(),.?":{}|<>]/;
-    if (!uppercaseReg.test(data.password)) {
-      Swal.fire({ icon: 'error', title: 'Password must contain at least one uppercase letter' });
-      return;
-    }
-    if (!specialCharReg.test(data.password)) {
-      Swal.fire({ icon: 'error', title: 'Password must contain at least one special character' });
-      return;
-    }
-
+    setIsBusy(true);
     try {
+      if (!data.photo || data.photo.length === 0) {
+        Swal.fire({ icon: 'error', title: 'Profile picture is required' });
+        return;
+      }
+      const file = data.photo[0];
+      if (file.size > 2 * 1024 * 1024) {
+        Swal.fire({ icon: 'error', title: 'Image size must be less than 2MB' });
+        return;
+      }
+
+      const uppercaseReg = /[A-Z]/;
+      const specialCharReg = /[!@#$%^&*(),.?":{}|<>]/;
+      if (!uppercaseReg.test(data.password)) {
+        Swal.fire({ icon: 'error', title: 'Password must contain at least one uppercase letter' });
+        return;
+      }
+      if (!specialCharReg.test(data.password)) {
+        Swal.fire({ icon: 'error', title: 'Password must contain at least one special character' });
+        return;
+      }
+
+      // 1. upload image
       const base64Image = await getBase64(file);
       const imageUrl = await uploadToImgbb(base64Image);
       setUploadedImageUrl(imageUrl);
 
+      // 2. create user in firebase/auth
       await createUser(data.email, data.password);
       await updateUser({ displayName: data.name, photoURL: imageUrl });
 
+      // 3. save user in backend
       const userInfo = {
         name: data.name,
         email: data.email,
@@ -112,25 +117,36 @@ const RegisterForm = () => {
         salary: parseInt(data.salary, 10),
         designation: data.designation,
         registeredAt: new Date().toISOString(),
-        isVerified: data.role === 'HR',
+        isVerified: data.role === "HR",
       };
 
-      await axiosSecure.post('/users', userInfo);
+      await axiosSecure.post("/users", userInfo);
 
-      navigate('/');
-      Swal.fire({ icon: 'success', title: 'Registration Successful!', showConfirmButton: false, timer: 2000 });
+      // 4. success
+      Swal.fire({
+        icon: "success",
+        title: "Registration Successful!",
+        showConfirmButton: false,
+        timer: 2000
+      });
+
+      // navigate back to previous page or home
+      navigate(from, { replace: true });
 
     } catch (error) {
-      Swal.fire({ icon: 'error', title: 'Registration Failed', text: error.message });
+      Swal.fire({ icon: "error", title: "Registration Failed", text: error.message });
+    } finally {
+      setIsBusy(false);
     }
   };
 
   // GOOGLE LOGIN
   const onGoogleLogin = async () => {
+    setIsBusy(true);
     try {
       const result = await googleSignIn();
       const user = result.user;
-      navigate('/');
+
       const userInfo = {
         name: user.displayName || 'No Name',
         email: user.email,
@@ -144,18 +160,25 @@ const RegisterForm = () => {
       };
 
       await axiosSecure.post('/users', userInfo);
-
       Swal.fire({ icon: 'success', title: 'Google Login Successful!', showConfirmButton: false, timer: 2000 });
       navigate('/');
     } catch (error) {
       Swal.fire({ icon: 'error', title: 'Google Sign-In Failed', text: error.message });
+    } finally {
+      setIsBusy(false);
     }
   };
 
   return (
     <div className={`min-h-screen flex flex-col lg:flex-row items-center justify-center ${pageBg} px-4 py-8`}>
+
+      {/* GLOBAL LOADER */}
+      {isBusy && (
+        <LRLoading></LRLoading>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)}
-        className={`w-full lg:w-1/2 max-w-xl sm:max-w-2xl ${formBg} p-4 sm:p-6 md:p-8 rounded-lg  mx-auto`}>
+        className={`w-full lg:w-1/2 max-w-xl sm:max-w-2xl ${formBg} p-4 sm:p-6 md:p-8 rounded-lg mx-auto`}>
 
         {/* PROFILE UPLOAD */}
         <div className="mb-6 flex flex-col items-center">
@@ -169,7 +192,6 @@ const RegisterForm = () => {
             className={`block w-full text-sm ${fileBtnStyle} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold`}
           />
           {errors.photo && <p className="text-sm text-red-500 mt-1">Profile picture is required</p>}
-          {uploading && <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Uploading image...</p>}
           {uploadedImageUrl && (
             <img src={uploadedImageUrl} alt="Uploaded Profile" className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mt-4 object-cover border-4 border-red-500 shadow-md" />
           )}
@@ -208,7 +230,6 @@ const RegisterForm = () => {
             {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
           </div>
 
-
           {/* Role */}
           <div>
             <label className={`block mb-1 font-medium ${labelColor}`}>Role</label>
@@ -228,13 +249,10 @@ const RegisterForm = () => {
               type="text"
               {...register('bankAccount', {
                 required: 'Bank account number is required',
-                pattern: {
-                  value: /^[0-9]+$/,
-                  message: 'Bank account number must contain only numbers'
-                },
+                pattern: { value: /^[0-9]+$/, message: 'Bank account number must contain only numbers' },
                 minLength: { value: 6, message: 'Bank account number is too short' }
               })}
-              onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')} // শুধু সংখ্যা রাখবে
+              onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
               className={`w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 ${inputBg}`}
               placeholder="Enter your bank account number"
             />
@@ -252,7 +270,7 @@ const RegisterForm = () => {
                 max: { value: 100000, message: 'Salary cannot exceed 100,000' },
                 pattern: { value: /^[0-9]+$/, message: 'Salary must be a number' }
               })}
-              onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')} // শুধু সংখ্যা রাখবে
+              onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
               className={`w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 ${inputBg}`}
               placeholder="Enter your salary"
             />
@@ -274,11 +292,12 @@ const RegisterForm = () => {
             {errors.designation && <p className="text-sm text-red-500 mt-1">{errors.designation.message}</p>}
           </div>
 
-
           {/* Password */}
           <div className="sm:col-span-2 relative">
             <label className={`block mb-1 font-medium ${labelColor}`}>Password</label>
-            <input type={showPassword ? 'text' : 'password'} {...register('password', { required: 'Password is required', minLength: { value: 6, message: 'Minimum 6 characters' } })}
+            <input
+              type={showPassword ? 'text' : 'password'}
+              {...register('password', { required: 'Password is required', minLength: { value: 6, message: 'Minimum 6 characters' } })}
               className={`w-full px-3 py-2 pr-10 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 ${inputBg}`} />
             <button type="button" onClick={() => setShowPassword(!showPassword)}
               className={`absolute right-3 top-[38px] ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -290,7 +309,9 @@ const RegisterForm = () => {
           {/* Confirm Password */}
           <div className="sm:col-span-2 relative">
             <label className={`block mb-1 font-medium ${labelColor}`}>Confirm Password</label>
-            <input type={showConfirmPassword ? 'text' : 'password'} {...register('confirmPassword', { required: 'Please confirm password', validate: (v) => v === password || 'Passwords do not match' })}
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              {...register('confirmPassword', { required: 'Please confirm password', validate: (v) => v === password || 'Passwords do not match' })}
               className={`w-full px-3 py-2 pr-10 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 ${inputBg}`} />
             <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className={`absolute right-3 top-[38px] ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -311,9 +332,14 @@ const RegisterForm = () => {
 
           {/* Submit */}
           <div className="sm:col-span-2">
-            <button type="submit" disabled={isSubmitting || uploading}
-              className={`w-full py-2 sm:py-3 rounded-md text-white transition ${isSubmitting || uploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'}`}>
-              {(isSubmitting || uploading) ? 'Processing…' : 'Register'}
+            <button type="submit" disabled={isBusy}
+              className={`w-full py-2 sm:py-3 rounded-md text-white transition ${isBusy ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'}`}>
+              {isBusy ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="loading loading-dots loading-sm"></span>
+                  Processing…
+                </span>
+              ) : 'Register'}
             </button>
           </div>
 
@@ -324,10 +350,19 @@ const RegisterForm = () => {
               <span className={`mx-2 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>Or register with</span>
               <hr className="flex-grow border-gray-300" />
             </div>
-            <button type="button" onClick={onGoogleLogin}
+            <button type="button" onClick={onGoogleLogin} disabled={isBusy}
               className={`w-full border border-gray-300 rounded-md py-2 sm:py-3 flex items-center justify-center gap-2 ${googleBtnHover} transition`}>
-              <FcGoogle className="text-2xl" />
-              Continue with Google
+              {isBusy ? (
+                <span className="flex items-center gap-2">
+                  <span className="loading loading-dots loading-md"></span>
+                  Please wait
+                </span>
+              ) : (
+                <>
+                  <FcGoogle className="text-2xl" />
+                  Continue with Google
+                </>
+              )}
             </button>
           </div>
 
@@ -335,6 +370,7 @@ const RegisterForm = () => {
           <p className={`sm:col-span-2 text-center text-sm mt-4 sm:mt-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
             Already have an account? <Link to="/login" className="text-red-600 hover:underline">Login</Link>
           </p>
+
         </div>
       </form>
     </div>

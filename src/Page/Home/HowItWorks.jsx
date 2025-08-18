@@ -66,7 +66,7 @@ const HowItWorks = () => {
       viewport={{ once: true }}
       transition={{ duration: 0.8 }}
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-9 flex flex-col md:flex-row items-start gap-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-15 flex flex-col md:flex-row items-start gap-12">
 
         {/* Left: Steps */}
         <div className="flex-1 w-full grid grid-cols-1 gap-6">

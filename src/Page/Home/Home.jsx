@@ -15,8 +15,8 @@ const Home = () => {
   const bgClass = theme === 'dark' ? 'bg-black text-gray-200' : 'bg-white text-gray-900';
 
   return (
-    <div className={`${bgClass} transition-colors duration-500`}>
-      <Banner />
+    <div className={`${bgClass}  transition-colors duration-500`}>
+    <div className=" mt-20 md:mt-0">  <Banner /></div>
       <FeatureSection />
       <SupportCard />
       <ReviewSection />

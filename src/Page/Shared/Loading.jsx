@@ -15,7 +15,7 @@ const Loading = () => {
     },
   };
 
-  const pageBg = theme === 'dark' ? 'bg-gray-900' : 'bg-white';
+  const pageBg = theme === 'dark' ? 'bg-black' : 'bg-white';
   const textColor = theme === 'dark' ? 'text-gray-200' : 'text-gray-600';
 
   return (

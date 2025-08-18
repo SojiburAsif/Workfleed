@@ -1,6 +1,6 @@
 // Header.js
 import React, { useState, useContext, useEffect } from 'react';
-import { Link, NavLink } from 'react-router'; // <-- ঠিক করা হলো
+import { Link, NavLink } from 'react-router';
 import { FiChevronDown } from 'react-icons/fi';
 import Logo from '../Shared/Logo';
 import UseAuth from '../../Hooks/UseAuth';
@@ -17,7 +17,7 @@ const Header = () => {
 
   const containerClass = theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black';
   const navLinkClass = ({ isActive }) =>
-    `font-semibold px-4 py-2 transition-colors duration-200 ${isActive
+    `font-semibold px-3 py-1.5 transition-colors duration-200 ${isActive
       ? 'text-red-500 underline'
       : theme === 'light'
         ? 'text-black'
@@ -26,10 +26,9 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed top-0 md:rounded-full md:mx-12 bg-gray-900 md:mt-5 md:px-3 left-0 right-0 z-50 shadow-md transition-colors duration-300 ${containerClass}`}
+      className={`fixed top-0 md:rounded-full md:mx-12 bg-gray-950 shadow-red-400 md:mt-5 md:px-3 left-0 right-0 z-50 shadow-md transition-colors duration-300 ${containerClass}`}
     >
-      <div className="flex justify-between items-center min-h-[90px] px-4 sm:px-6 lg:px-12 text-lg w-full">
-
+      <div className="flex justify-between items-center min-h-[70px] px-4 sm:px-6 lg:px-12 text-lg w-full">
         {/* Left: Logo + Mobile Toggle */}
         <div className="flex items-center gap-4">
           <button
@@ -52,23 +51,15 @@ const Header = () => {
         </div>
 
         {/* Desktop Menu */}
-        <nav className="hidden lg:flex gap-6 items-center">
+        <nav className="hidden lg:flex gap-3 items-center">
           <NavLink to="/" className={navLinkClass}>Home</NavLink>
           <NavLink to="/dashboard" className={navLinkClass}>Dashboard</NavLink>
-
-          <div className="relative group font-semibold">
-            <span className="cursor-pointer flex items-center gap-1">Services <FiChevronDown className="mt-[2px]" /></span>
-            <div className={`absolute left-0 mt-2 w-44 shadow-md rounded-md z-50 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition duration-200 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>
-              <NavLink to="/services/sales" className={`block px-4 py-2 font-semibold ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-200'} hover:text-red-500`}>Sales</NavLink>
-              <NavLink to="/services/support" className={`block px-4 py-2 font-semibold ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-200'} hover:text-red-500`}>Support</NavLink>
-            </div>
-          </div>
-
-          <NavLink to="/contact" className={navLinkClass}>Contact</NavLink>
+          <NavLink to="/services/support" className={navLinkClass}>Support</NavLink>
+          <NavLink to="/dashboard/contact-us" className={navLinkClass}>Contact</NavLink>
         </nav>
 
         {/* Right: Auth + Theme */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {/* Theme Toggle */}
           <label className="swap swap-rotate cursor-pointer">
             <input
@@ -78,7 +69,7 @@ const Header = () => {
             />
             {/* Sun Icon */}
             <svg
-              className="swap-on h-8 w-8 sm:h-8 sm:w-8 fill-current"
+              className="swap-on h-6 w-6 fill-current"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
             >
@@ -87,24 +78,23 @@ const Header = () => {
 
             {/* Moon Icon */}
             <svg
-              className="swap-off h-8 w-8 sm:h-8 sm:w-8 fill-current"
+              className="swap-off h-6 w-6 fill-current"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
             >
               <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
-            </svg></label>
-
+            </svg>
+          </label>
 
           {!user ? (
             <>
               <Link to="/login" className="text-sm font-semibold hover:underline hover:text-red-500">Login</Link>
-              <Link to="/register" className="text-sm font-medium rounded-full px-5 py-2 border hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">Register</Link>
+              <Link to="/register" className="text-sm font-medium rounded-full px-4 py-1.5 border hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">Register</Link>
             </>
           ) : (
             <div className="dropdown dropdown-bottom dropdown-end hidden sm:flex items-center gap-1">
-              {/* Avatar */}
               <label tabIndex={0} className=" avatar">
-                <div className="  h-16 w-16 rounded-full border-2 border-red-500 ">
+                <div className="h-12 w-12 rounded-full border-2 border-red-500 ">
                   <img
                     src={user.photoURL || 'https://i.ibb.co/S47T06r9/download-3.png'}
                     alt="User Avatar"
@@ -112,15 +102,9 @@ const Header = () => {
                 </div>
               </label>
 
-              {/* Toggle Icon */}
-              {/* <label tabIndex={0} className="cursor-pointer">
-                <FiChevronDown className="text-2xl" />
-              </label> */}
-
-              {/* Dropdown Menu */}
               <ul
                 tabIndex={0}
-                className="dropdown-content menu p-1 shadow-lg bg-base-100 dark:bg-gray-900 rounded-box w-34"
+                className="dropdown-content menu p-1 shadow-lg bg-base-100 dark:bg-gray-900 rounded-box w-32"
               >
                 <li>
                   <button onClick={logout} className="text-red-500 font-semibold">Logout</button>
@@ -134,19 +118,13 @@ const Header = () => {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div
-          className={`lg:hidden fixed top-[90px] left-0 right-0 z-40 px-0 py-4 border-t transition-all duration-300 ${containerClass} border-gray-300 dark:border-gray-700`}
+          className={`lg:hidden fixed top-[70px] left-0 right-0 z-40 px-0 py-3 border-t transition-all duration-300 ${containerClass} border-gray-300 dark:border-gray-700`}
         >
           <nav className="flex flex-col gap-2 w-full px-4">
             <NavLink to="/" className={navLinkClass}>Home</NavLink>
             <NavLink to="/dashboard" className={navLinkClass}>Dashboard</NavLink>
-            <div>
-              <span className="cursor-default font-semibold block mb-1">Services</span>
-              <div className="ml-0 flex flex-col gap-1">
-                <NavLink to="/services/sales" className={`px-4 py-2 rounded ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-200'} font-medium`}>Sales</NavLink>
-                <NavLink to="/services/support" className={`px-4 py-2 rounded ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-200'} font-medium`}>Support</NavLink>
-              </div>
-            </div>
-            <NavLink to="/contact" className={navLinkClass}>Contact</NavLink>
+            <NavLink to="/services/support" className={navLinkClass}>Support</NavLink>
+            <NavLink to="/dashboard/contact-us" className={navLinkClass}>Contact</NavLink>
             {user && (
               <button
                 onClick={logout}

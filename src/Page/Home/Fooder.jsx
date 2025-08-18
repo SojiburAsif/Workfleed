@@ -10,7 +10,7 @@ const Footer = () => {
   const { theme } = useContext(ThemeContext);
 
   // Theme-based classes
-  const bgClass = theme === 'dark' ? 'bg-gray-900 text-gray-200' : 'bg-black text-gray-200';
+  const bgClass = theme === 'dark' ? 'bg-black text-gray-200' : 'bg-black text-gray-200';
   const textGray = theme === 'dark' ? 'text-gray-400' : 'text-gray-400';
   const accentColor = theme === 'dark' ? 'text-red-400' : 'text-red-400';
   const accentHover = 'hover:text-red-500';
@@ -18,7 +18,7 @@ const Footer = () => {
 
   return (
     <footer className={`${bgClass} py-12 border-t ${borderColor} relative`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16">
         {/* Website Name Centered */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold flex justify-center items-center space-x-3">

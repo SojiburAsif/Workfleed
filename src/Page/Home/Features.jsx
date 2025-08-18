@@ -118,7 +118,7 @@ const FeatureSection = () => {
   const modalBg = theme === 'dark' ? 'bg-gray-950 text-gray-100' : 'bg-white text-gray-900';
 
   return (
-    <section className={`${wrapperBg} py-14 px-4 sm:px-6 lg:px-20`}>
+    <section className={`${wrapperBg} py-14 px-4 sm:px-6 lg:px-10`}>
       <div className="max-w-7xl mx-auto text-center mb-12">
         <FaStar className="text-red-600 dark:text-red-400 w-10 h-10 mx-auto mb-4" />
         <h2 className={`text-3xl sm:text-4xl font-extrabold flex items-center justify-center gap-3 mb-3`}>

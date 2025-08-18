@@ -21,19 +21,19 @@ import {
 import { FaUsers, FaTasks, FaMoneyBillWave, FaClock, FaStar, FaEnvelope, FaList, FaChartBar } from "react-icons/fa";
 import { MdVerified, MdClose } from "react-icons/md";
 import { ThemeContext } from "../../../Theme/ThemeProvider";
-import Swal from "sweetalert2";
 import RewLoading from "../../Shared/RewLoading";
+import { HiArrowSmRight } from "react-icons/hi";
 
-
+// === fallback data (only used if fetch fails) ===
 const PROVIDED_USER = {
   _id: "687253bce954b145482f7335",
-  name: "MD Asif",
+  name: "User..",
   email: "asif81534@gmail.com",
-  photo: "https://i.pravatar.cc/120?img=5",
-  role: "employee",
+  photo: "https://i.ibb.co.com/mFTv3zj6/322823b95163.png",
+  role: "employee.....",
   salary: 200000,
   verified: false,
-  isVerified: false,
+  isVerified: false, // new normalized flag
 };
 const PROVIDED_WORK = [
   { _id: "6874c7532005bae68258ab5b", task: "Sales", hours: "2", date: "2025-01-30", userEmail: "nohaluve@mailinator.com", name: "Ora Alston" },
@@ -48,7 +48,7 @@ function formatShort(n) {
   return n;
 }
 
-
+// Normalize a user object so it always has isVerified
 function normalizeUser(u = {}) {
   return {
     ...u,
@@ -58,7 +58,7 @@ function normalizeUser(u = {}) {
 
 export default function DashboardWithReviews() {
   const axiosSecure = UseAxios();
-  const { user, updateUser } = UseAuth();
+  const { user } = UseAuth(); // removed updateUser since edit removed
   const { theme, toggleTheme } = useContext(ThemeContext) || {};
 
   // data state
@@ -70,13 +70,6 @@ export default function DashboardWithReviews() {
 
   // UI state
   const [loading, setLoading] = useState(true);
-  const [editOpen, setEditOpen] = useState(false);
-  const [editName, setEditName] = useState("");
-  const [editPhoto, setEditPhoto] = useState("");
-
-
-  const [uploading, setUploading] = useState(false);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
 
   // modal for stat details
   const [statModalOpen, setStatModalOpen] = useState(false);
@@ -127,12 +120,12 @@ export default function DashboardWithReviews() {
           if (mounted) setWorks(PROVIDED_WORK);
         }
 
-
+        // users list
         try {
           const ulist = await axiosSecure.get("/users");
           if (!mounted) return;
           const raw = Array.isArray(ulist.data) ? ulist.data : ulist.data?.data ?? [];
-
+          // normalize each user to have isVerified
           if (mounted) setUsers(raw.map(normalizeUser));
         } catch (e) {
           if (mounted) setUsers([]);
@@ -160,54 +153,6 @@ export default function DashboardWithReviews() {
     fetchAll();
     return () => (mounted = false);
   }, [axiosSecure, user?.email]);
-
-
-  useEffect(() => {
-    setEditName(latestUser?.name || "");
-    setEditPhoto(latestUser?.photo || "");
-
-    setUploadedImageUrl(latestUser?.photo || "");
-  }, [latestUser]);
-
-
-  const uploadToImgbb = async (base64Image) => {
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      // imgbb expects base64 data (without the data:*/*;base64, prefix)
-      formData.append("image", base64Image);
-      const response = await axios.post(
-        `https://api.imgbb.com/1/upload?key=0b8044c43759b62ba2819474237a94de`,
-        formData
-      );
-      setUploading(false);
-      return response.data.data.url;
-    } catch (error) {
-      setUploading(false);
-      Swal.fire({ icon: "error", title: "Image Upload Failed", text: error.message });
-      throw error;
-    }
-  };
-
-  // === NEW: file input handler ===
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      try {
-        const result = ev.target.result; // data:[mime];base64,xxxxx
-        const base64 = result.split(",")[1];
-        const url = await uploadToImgbb(base64);
-        setUploadedImageUrl(url);
-        setEditPhoto(url); // set photo so saveEdit will use it
-        Swal.fire({ icon: "success", title: "Image uploaded" });
-      } catch (err) {
-        console.error("upload error", err);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
 
   // Derived chart data
   const payrollChartData = useMemo(() => {
@@ -272,52 +217,6 @@ export default function DashboardWithReviews() {
     if (t === 'Hours') return <FaClock className="w-5 h-5" />;
     if (t === 'Payroll') return <FaMoneyBillWave className="w-5 h-5" />;
     return <FaList className="w-5 h-5" />;
-  }
-
-  // Edit handlers
-  async function saveEdit() {
-    // optimistic UI update
-    const optimistic = { ...(latestUser || {}), name: editName, photo: editPhoto };
-    setLatestUser(optimistic);
-    // update auth context so user data reflects immediately
-    if (typeof updateUser === "function") {
-      try {
-        updateUser(optimistic);
-      } catch (err) {
-        // ignore - best-effort
-        console.warn("updateUser failed:", err);
-      }
-    }
-    setEditOpen(false);
-    // attempt backend save (best-effort) - prefer /user/:email
-    try {
-      if (axiosSecure && latestUser?.email) {
-        const res = await axiosSecure.put(`/user/${encodeURIComponent(latestUser.email)}`, { name: editName, photo: editPhoto });
-        const serverUser = res?.data?.data ?? res?.data ?? null;
-        if (serverUser) {
-          const nu = normalizeUser(serverUser);
-          setLatestUser(nu);
-          if (typeof updateUser === "function") {
-            try { updateUser(nu); } catch (err) { console.warn("updateUser failed:", err); }
-          }
-        }
-      } else if (axiosSecure && latestUser?._id) {
-        const res = await axiosSecure.put(`/user/${latestUser._id}`, { name: editName, photo: editPhoto });
-        const serverUser = res?.data?.data ?? res?.data ?? null;
-        if (serverUser) {
-          const nu = normalizeUser(serverUser);
-          setLatestUser(nu);
-          if (typeof updateUser === "function") {
-            try { updateUser(nu); } catch (err) { console.warn("updateUser failed:", err); }
-          }
-        }
-      }
-      Swal.fire({ icon: 'success', title: 'Profile saved' });
-    } catch (e) {
-      // keep local state; notify user optionally
-      console.warn("Failed to save profile on server:", e);
-      Swal.fire({ icon: "warning", title: "Profile save failed on server", text: "Local UI updated." });
-    }
   }
 
   function openStatModal(type) {
@@ -391,7 +290,7 @@ export default function DashboardWithReviews() {
                 </div>
                 <div className={`${subtleText} text-sm`}>{latestUser.role || "—"}</div>
               </div>
-              <button onClick={() => setEditOpen(true)} className="ml-3 px-3 py-1 rounded bg-red-500 text-white text-sm hover:bg-red-600 transition">Edit</button>
+              {/* Edit button removed as requested */}
             </div>
           </div>
         </div>
@@ -474,8 +373,11 @@ export default function DashboardWithReviews() {
           <div className="px-4 py-3">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold">Latest Reviews</h2>
-              <Link to="/dashboard/reviews" className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition">
-                View All Reviews →
+              <Link
+                to="/dashboard/reviews"
+                className="bg-red-500 text-white px-3 py-2 rounded text-sm hover:bg-red-600 transition flex items-center gap-1"
+              >
+                View All Reviews <HiArrowSmRight />
               </Link>
             </div>
 
@@ -521,57 +423,6 @@ export default function DashboardWithReviews() {
           </div>
         </div>
 
-        {/* Edit profile modal */}
-        {editOpen && (
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-[1px] z-50 flex items-center justify-center p-4" onClick={() => setEditOpen(false)}>
-            <div className="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full shadow-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
-              <div className="p-4 border-b border-black/10 dark:border-white/10">
-                <h3 className="text-lg font-semibold">Edit profile</h3>
-              </div>
-
-              {/* === NEW: Image upload UI (added) === */}
-              <div className="p-4 border-b border-black/6 dark:border-white/6">
-                <div className="mb-4 flex flex-col items-center">
-                  <label className={`mb-2 font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
-                    {/* small inline icon */}
-                    <svg className="w-4 h-4 inline-block mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="8" r="3" stroke="currentColor" strokeWidth="1.5" />
-                      <path d="M4 20c1.5-4 6-6 8-6s6.5 2 8 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                    Upload Profile Picture
-                  </label>
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="block w-full text-sm mb-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold"
-                  />
-
-                  {uploading && <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Uploading image...</p>}
-
-                  {uploadedImageUrl ? (
-                    <img src={uploadedImageUrl} alt="Uploaded Profile" className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mt-4 object-cover border-4 border-red-500 shadow-md" />
-                  ) : (
-                    <img src={editPhoto || latestUser.photo || "/placeholder-avatar.png"} alt="Profile preview" className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mt-4 object-cover border" />
-                  )}
-                </div>
-              </div>
-
-              <div className="p-4 space-y-3">
-                <label className="block text-sm">Name</label>
-                <input className="w-full p-2 border rounded bg-transparent" value={editName} onChange={(e) => setEditName(e.target.value)} />
-                <label className="block text-sm">Photo URL</label>
-                <input className="w-full p-2 border rounded bg-transparent" value={editPhoto} onChange={(e) => setEditPhoto(e.target.value)} />
-                <div className="flex justify-end gap-2 pt-2">
-                  <button className="px-4 py-2 rounded border" onClick={() => setEditOpen(false)}>Cancel</button>
-                  <button className="px-4 py-2 rounded bg-red-500 text-white" onClick={saveEdit}>Save</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Stat details modal (transparent bg + content) */}
         {statModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={closeStatModal}>
@@ -588,155 +439,218 @@ export default function DashboardWithReviews() {
                 <button onClick={closeStatModal} className="text-sm px-2 py-1 rounded border"><MdClose /></button>
               </div>
 
-              <div className="mt-4">
-                {statModalType === 'Users' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="font-medium mb-2 flex items-center gap-2"><FaUsers /> Role distribution</h4>
-                      <div style={{ width: '100%', height: 220 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie dataKey="value" data={usersRoleDistribution.roleData} outerRadius={80} label>
-                              {usersRoleDistribution.roleData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                              ))}
-                            </Pie>
-                            <Legend />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2 flex items-center gap-2"><MdVerified /> Verified vs Unverified</h4>
-                      <div style={{ width: '100%', height: 220 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie dataKey="value" data={usersRoleDistribution.verifiedData} outerRadius={80} label>
-                              {usersRoleDistribution.verifiedData.map((entry, index) => (
-                                <Cell key={`cellv-${index}`} fill={COLORS[index % COLORS.length]} />
-                              ))}
-                            </Pie>
-                            <Legend />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
+           <div className="mt-4">
+  {statModalType === 'Users' && (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+          <FaUsers /> Role distribution
+        </h4>
+        <div style={{ width: '100%', height: 220 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                dataKey="value"
+                data={usersRoleDistribution.roleData}
+                outerRadius={80}
+                label
+              >
+                {usersRoleDistribution.roleData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
-                    <div className="md:col-span-2 mt-2">
-                      <h4 className="font-medium mb-2 flex items-center gap-2"><FaList /> User list</h4>
-                      <div className="overflow-auto max-h-48 border rounded p-2">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="text-left">
-                              <th className="pr-2">Name</th>
-                              <th className="pr-2">Email</th>
-                              <th className="pr-2">Role</th>
-                              <th className="pr-2">Verified</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {(users || []).map(u => (
-                              <tr key={u._id} className="border-t">
-                                <td className="pr-2 py-1 flex items-center gap-2">{u.name ? u.name : '—'}</td>
-                                <td className="pr-2 py-1 flex items-center gap-2"><FaEnvelope className="w-3 h-3 opacity-60" /> {u.email}</td>
-                                <td className="pr-2 py-1">{u.role || '—'}</td>
-                                <td className="pr-2 py-1">{u.isVerified ? 'Yes' : 'No'}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                )}
+      <div>
+        <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+          <MdVerified /> Verified vs Unverified
+        </h4>
+        <div style={{ width: '100%', height: 220 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                dataKey="value"
+                data={usersRoleDistribution.verifiedData}
+                outerRadius={80}
+                label
+              >
+                {usersRoleDistribution.verifiedData.map((entry, index) => (
+                  <Cell
+                    key={`cellv-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
-                {statModalType === 'Payroll' && (
-                  <div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium flex items-center gap-2"><FaMoneyBillWave /> Recent payrolls</h4>
-                        <div className="overflow-auto max-h-48 border rounded p-2 mt-2 text-sm">
-                          <table className="w-full">
-                            <thead>
-                              <tr>
-                                <th className="text-left">Name</th>
-                                <th className="text-left">Email</th>
-                                <th className="text-left">Salary</th>
-                                <th className="text-left">Paid</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {(payments || []).slice().reverse().map(p => (
-                                <tr key={p._id} className="border-t">
-                                  <td className="py-1 flex items-center gap-2"><FaUsers className="w-3 h-3 opacity-60" /> {p.name}</td>
-                                  <td className="py-1">{p.email}</td>
-                                  <td className="py-1">{p.salary}</td>
-                                  <td className="py-1 flex items-center gap-2">{p.paid ? <span className="text-green-500">Yes</span> : <span className="text-red-400">No</span>}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
+      {/* User List */}
+      <div className="md:col-span-2 mt-2">
+        <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+          <FaList /> User list
+        </h4>
+        <div className="overflow-x-auto max-h-48 border rounded p-2">
+          <table className="w-full text-xs sm:text-sm min-w-[500px]">
+            <thead>
+              <tr className="text-left">
+                <th className="pr-2">Name</th>
+                <th className="pr-2">Email</th>
+                <th className="pr-2">Role</th>
+                <th className="pr-2">Verified</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(users || []).map((u) => (
+                <tr key={u._id} className="border-t">
+                  <td className="pr-2 py-1">{u.name ? u.name : '—'}</td>
+                  <td className="pr-2 py-1 flex items-center gap-1">
+                    <FaEnvelope className="w-3 h-3 opacity-60" /> {u.email}
+                  </td>
+                  <td className="pr-2 py-1">{u.role || '—'}</td>
+                  <td className="pr-2 py-1">{u.isVerified ? 'Yes' : 'No'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )}
 
-                      <div>
-                        <h4 className="font-medium">Summary</h4>
-                        <div className="mt-2 text-sm">
-                          <div>Total payroll items: {(payments || []).length}</div>
-                          <div>Paid: {payments.filter(p => p.paid).length}</div>
-                          <div>Unpaid: {payments.filter(p => !p.paid).length}</div>
-                          <div className="mt-2">Total amount paid: {formatShort((payments || []).reduce((s, p) => s + (Number(p.salary) || 0), 0))}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+  {statModalType === 'Payroll' && (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <h4 className="font-medium flex items-center gap-2 text-sm sm:text-base">
+          <FaMoneyBillWave /> Recent payrolls
+        </h4>
+        <div className="overflow-x-auto max-h-48 border rounded p-2 mt-2 text-xs sm:text-sm">
+          <table className="w-full min-w-[500px]">
+            <thead>
+              <tr>
+                <th className="text-left">Name</th>
+                <th className="text-left">Email</th>
+                <th className="text-left">Salary</th>
+                <th className="text-left">Paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(payments || [])
+                .slice()
+                .reverse()
+                .map((p) => (
+                  <tr key={p._id} className="border-t">
+                    <td className="py-1 flex items-center gap-1">
+                      <FaUsers className="w-3 h-3 opacity-60" /> {p.name}
+                    </td>
+                    <td className="py-1">{p.email}</td>
+                    <td className="py-1">{p.salary}</td>
+                    <td className="py-1">
+                      {p.paid ? (
+                        <span className="text-green-500">Yes</span>
+                      ) : (
+                        <span className="text-red-400">No</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-                {statModalType === 'Hours' && (
-                  <div>
-                    <h4 className="font-medium mb-2 flex items-center gap-2"><FaClock /> Works and hours</h4>
-                    <div className="overflow-auto max-h-64 border rounded p-2 text-sm">
-                      <table className="w-full">
-                        <thead>
-                          <tr>
-                            <th className="text-left">Date</th>
-                            <th className="text-left">Name</th>
-                            <th className="text-left">Task</th>
-                            <th className="text-left">Hours</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(works || []).slice().reverse().map(w => (
-                            <tr key={w._id} className="border-t">
-                              <td className="py-1">{w.date}</td>
-                              <td className="py-1">{w.name || w.userEmail}</td>
-                              <td className="py-1">{w.task}</td>
-                              <td className="py-1">{w.hours}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                      <div className="mt-2">Total hours: {(works || []).reduce((s, w) => s + Number(w.hours || 0), 0)}</div>
-                    </div>
-                  </div>
-                )}
+      <div>
+        <h4 className="font-medium text-sm sm:text-base">Summary</h4>
+        <div className="mt-2 text-xs sm:text-sm">
+          <div>Total payroll items: {(payments || []).length}</div>
+          <div>Paid: {payments.filter((p) => p.paid).length}</div>
+          <div>Unpaid: {payments.filter((p) => !p.paid).length}</div>
+          <div className="mt-2">
+            Total amount paid:{' '}
+            {formatShort(
+              (payments || []).reduce(
+                (s, p) => s + (Number(p.salary) || 0),
+                0
+              )
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
 
-                {statModalType === 'Works' && (
-                  <div>
-                    <h4 className="font-medium mb-2 flex items-center gap-2"><FaTasks /> All works</h4>
-                    <div className="overflow-auto max-h-64 border rounded p-2 text-sm">
-                      <ul className="space-y-2">
-                        {(works || []).slice().reverse().map(w => (
-                          <li key={w._id} className="p-2 border rounded">
-                            <div className="text-sm font-medium">{w.task} — {w.name || w.userEmail}</div>
-                            <div className="text-xs opacity-70">Date: {w.date} • Hours: {w.hours}</div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </div>
+  {statModalType === 'Hours' && (
+    <div>
+      <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+        <FaClock /> Works and hours
+      </h4>
+      <div className="overflow-x-auto max-h-64 border rounded p-2 text-xs sm:text-sm">
+        <table className="w-full min-w-[500px]">
+          <thead>
+            <tr>
+              <th className="text-left">Date</th>
+              <th className="text-left">Name</th>
+              <th className="text-left">Task</th>
+              <th className="text-left">Hours</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(works || [])
+              .slice()
+              .reverse()
+              .map((w) => (
+                <tr key={w._id} className="border-t">
+                  <td className="py-1">{w.date}</td>
+                  <td className="py-1">{w.name || w.userEmail}</td>
+                  <td className="py-1">{w.task}</td>
+                  <td className="py-1">{w.hours}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+        <div className="mt-2 text-xs sm:text-sm">
+          Total hours:{' '}
+          {(works || []).reduce((s, w) => s + Number(w.hours || 0), 0)}
+        </div>
+      </div>
+    </div>
+  )}
+
+  {statModalType === 'Works' && (
+    <div>
+      <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+        <FaTasks /> All works
+      </h4>
+      <div className="overflow-auto max-h-64 border rounded p-2 text-xs sm:text-sm">
+        <ul className="space-y-2">
+          {(works || [])
+            .slice()
+            .reverse()
+            .map((w) => (
+              <li key={w._id} className="p-2 border rounded">
+                <div className="text-sm font-medium">
+                  {w.task} — {w.name || w.userEmail}
+                </div>
+                <div className="text-xs opacity-70">
+                  Date: {w.date} • Hours: {w.hours}
+                </div>
+              </li>
+            ))}
+        </ul>
+      </div>
+    </div>
+  )}
+</div>
+
             </div>
           </div>
         )}
@@ -787,4 +701,3 @@ const UserList = ({ users }) => {
     </div>
   );
 };
-

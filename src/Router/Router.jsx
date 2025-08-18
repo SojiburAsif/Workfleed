@@ -25,6 +25,7 @@ import Trames from "../Page/Home/Trames";
 import About from "../Page/Home/About";
 import Privacy from "../Page/Home/Privacy";
 import ReviewsPage from "../Page/Dashborde/Main/Review/Review";
+import Support from "../Page/Home/Support/Support";
 
 
 export const router = createBrowserRouter([
@@ -132,5 +133,10 @@ export const router = createBrowserRouter([
   {
     path: "/privacy",
     element: <Privacy></Privacy>
+  },
+  {
+    path: "/services/support",
+    element: <Support></Support>
   }
+
 ]);

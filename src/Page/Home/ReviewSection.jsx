@@ -19,7 +19,7 @@ const ReviewSection = () => {
   const [showAll, setShowAll] = useState(false);
   const [fetching, setFetching] = useState(true);
 
-  const placeholderAvatar = 'https://i.pravatar.cc/100?img=10';
+  const placeholderAvatar = 'https://i.ibb.co.com/mFTv3zj6/322823b95163.png';
   const COLLAPSE_COUNT = 6;
 
   useEffect(() => {
@@ -98,8 +98,8 @@ const ReviewSection = () => {
   const borderColor = theme === 'dark' ? 'border-gray-700' : 'border-gray-200';
 
   return (
-    <section className={`${sectionBg} py-16 px-4 sm:px-6 lg:px-20`}>
-      <div className="max-w-7xl mx-auto px-2 sm:px-12">
+    <section className={`${sectionBg} py-16 px-4 sm:px-6 lg:px-14`}>
+      <div className="max-w-7xl mx-auto px-2  sm:px-12">
         {/* header */}
         <div className="text-center mb-8">
           <h3 className="text-sm font-semibold uppercase tracking-widest text-red-500">User Feedback</h3>
