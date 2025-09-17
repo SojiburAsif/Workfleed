@@ -439,217 +439,217 @@ export default function DashboardWithReviews() {
                 <button onClick={closeStatModal} className="text-sm px-2 py-1 rounded border"><MdClose /></button>
               </div>
 
-           <div className="mt-4">
-  {statModalType === 'Users' && (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
-          <FaUsers /> Role distribution
-        </h4>
-        <div style={{ width: '100%', height: 220 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                dataKey="value"
-                data={usersRoleDistribution.roleData}
-                outerRadius={80}
-                label
-              >
-                {usersRoleDistribution.roleData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+              <div className="mt-4">
+                {statModalType === 'Users' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+                        <FaUsers /> Role distribution
+                      </h4>
+                      <div style={{ width: '100%', height: 220 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              dataKey="value"
+                              data={usersRoleDistribution.roleData}
+                              outerRadius={80}
+                              label
+                            >
+                              {usersRoleDistribution.roleData.map((entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={COLORS[index % COLORS.length]}
+                                />
+                              ))}
+                            </Pie>
+                            <Legend />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
 
-      <div>
-        <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
-          <MdVerified /> Verified vs Unverified
-        </h4>
-        <div style={{ width: '100%', height: 220 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                dataKey="value"
-                data={usersRoleDistribution.verifiedData}
-                outerRadius={80}
-                label
-              >
-                {usersRoleDistribution.verifiedData.map((entry, index) => (
-                  <Cell
-                    key={`cellv-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+                    <div>
+                      <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+                        <MdVerified /> Verified vs Unverified
+                      </h4>
+                      <div style={{ width: '100%', height: 220 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              dataKey="value"
+                              data={usersRoleDistribution.verifiedData}
+                              outerRadius={80}
+                              label
+                            >
+                              {usersRoleDistribution.verifiedData.map((entry, index) => (
+                                <Cell
+                                  key={`cellv-${index}`}
+                                  fill={COLORS[index % COLORS.length]}
+                                />
+                              ))}
+                            </Pie>
+                            <Legend />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
 
-      {/* User List */}
-      <div className="md:col-span-2 mt-2">
-        <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
-          <FaList /> User list
-        </h4>
-        <div className="overflow-x-auto max-h-48 border rounded p-2">
-          <table className="w-full text-xs sm:text-sm min-w-[500px]">
-            <thead>
-              <tr className="text-left">
-                <th className="pr-2">Name</th>
-                <th className="pr-2">Email</th>
-                <th className="pr-2">Role</th>
-                <th className="pr-2">Verified</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(users || []).map((u) => (
-                <tr key={u._id} className="border-t">
-                  <td className="pr-2 py-1">{u.name ? u.name : '—'}</td>
-                  <td className="pr-2 py-1 flex items-center gap-1">
-                    <FaEnvelope className="w-3 h-3 opacity-60" /> {u.email}
-                  </td>
-                  <td className="pr-2 py-1">{u.role || '—'}</td>
-                  <td className="pr-2 py-1">{u.isVerified ? 'Yes' : 'No'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  )}
+                    {/* User List */}
+                    <div className="md:col-span-2 mt-2">
+                      <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+                        <FaList /> User list
+                      </h4>
+                      <div className="overflow-x-auto max-h-48 border rounded p-2">
+                        <table className="w-full text-xs sm:text-sm min-w-[500px]">
+                          <thead>
+                            <tr className="text-left">
+                              <th className="pr-2">Name</th>
+                              <th className="pr-2">Email</th>
+                              <th className="pr-2">Role</th>
+                              <th className="pr-2">Verified</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(users || []).map((u) => (
+                              <tr key={u._id} className="border-t">
+                                <td className="pr-2 py-1">{u.name ? u.name : '—'}</td>
+                                <td className="pr-2 py-1 flex items-center gap-1">
+                                  <FaEnvelope className="w-3 h-3 opacity-60" /> {u.email}
+                                </td>
+                                <td className="pr-2 py-1">{u.role || '—'}</td>
+                                <td className="pr-2 py-1">{u.isVerified ? 'Yes' : 'No'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-  {statModalType === 'Payroll' && (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <h4 className="font-medium flex items-center gap-2 text-sm sm:text-base">
-          <FaMoneyBillWave /> Recent payrolls
-        </h4>
-        <div className="overflow-x-auto max-h-48 border rounded p-2 mt-2 text-xs sm:text-sm">
-          <table className="w-full min-w-[500px]">
-            <thead>
-              <tr>
-                <th className="text-left">Name</th>
-                <th className="text-left">Email</th>
-                <th className="text-left">Salary</th>
-                <th className="text-left">Paid</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(payments || [])
-                .slice()
-                .reverse()
-                .map((p) => (
-                  <tr key={p._id} className="border-t">
-                    <td className="py-1 flex items-center gap-1">
-                      <FaUsers className="w-3 h-3 opacity-60" /> {p.name}
-                    </td>
-                    <td className="py-1">{p.email}</td>
-                    <td className="py-1">{p.salary}</td>
-                    <td className="py-1">
-                      {p.paid ? (
-                        <span className="text-green-500">Yes</span>
-                      ) : (
-                        <span className="text-red-400">No</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                {statModalType === 'Payroll' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-medium flex items-center gap-2 text-sm sm:text-base">
+                        <FaMoneyBillWave /> Recent payrolls
+                      </h4>
+                      <div className="overflow-x-auto max-h-48 border rounded p-2 mt-2 text-xs sm:text-sm">
+                        <table className="w-full min-w-[500px]">
+                          <thead>
+                            <tr>
+                              <th className="text-left">Name</th>
+                              <th className="text-left">Email</th>
+                              <th className="text-left">Salary</th>
+                              <th className="text-left">Paid</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(payments || [])
+                              .slice()
+                              .reverse()
+                              .map((p) => (
+                                <tr key={p._id} className="border-t">
+                                  <td className="py-1 flex items-center gap-1">
+                                    <FaUsers className="w-3 h-3 opacity-60" /> {p.name}
+                                  </td>
+                                  <td className="py-1">{p.email}</td>
+                                  <td className="py-1">{p.salary}</td>
+                                  <td className="py-1">
+                                    {p.paid ? (
+                                      <span className="text-green-500">Yes</span>
+                                    ) : (
+                                      <span className="text-red-400">No</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
 
-      <div>
-        <h4 className="font-medium text-sm sm:text-base">Summary</h4>
-        <div className="mt-2 text-xs sm:text-sm">
-          <div>Total payroll items: {(payments || []).length}</div>
-          <div>Paid: {payments.filter((p) => p.paid).length}</div>
-          <div>Unpaid: {payments.filter((p) => !p.paid).length}</div>
-          <div className="mt-2">
-            Total amount paid:{' '}
-            {formatShort(
-              (payments || []).reduce(
-                (s, p) => s + (Number(p.salary) || 0),
-                0
-              )
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  )}
+                    <div>
+                      <h4 className="font-medium text-sm sm:text-base">Summary</h4>
+                      <div className="mt-2 text-xs sm:text-sm">
+                        <div>Total payroll items: {(payments || []).length}</div>
+                        <div>Paid: {payments.filter((p) => p.paid).length}</div>
+                        <div>Unpaid: {payments.filter((p) => !p.paid).length}</div>
+                        <div className="mt-2">
+                          Total amount paid:{' '}
+                          {formatShort(
+                            (payments || []).reduce(
+                              (s, p) => s + (Number(p.salary) || 0),
+                              0
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-  {statModalType === 'Hours' && (
-    <div>
-      <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
-        <FaClock /> Works and hours
-      </h4>
-      <div className="overflow-x-auto max-h-64 border rounded p-2 text-xs sm:text-sm">
-        <table className="w-full min-w-[500px]">
-          <thead>
-            <tr>
-              <th className="text-left">Date</th>
-              <th className="text-left">Name</th>
-              <th className="text-left">Task</th>
-              <th className="text-left">Hours</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(works || [])
-              .slice()
-              .reverse()
-              .map((w) => (
-                <tr key={w._id} className="border-t">
-                  <td className="py-1">{w.date}</td>
-                  <td className="py-1">{w.name || w.userEmail}</td>
-                  <td className="py-1">{w.task}</td>
-                  <td className="py-1">{w.hours}</td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-        <div className="mt-2 text-xs sm:text-sm">
-          Total hours:{' '}
-          {(works || []).reduce((s, w) => s + Number(w.hours || 0), 0)}
-        </div>
-      </div>
-    </div>
-  )}
+                {statModalType === 'Hours' && (
+                  <div>
+                    <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+                      <FaClock /> Works and hours
+                    </h4>
+                    <div className="overflow-x-auto max-h-64 border rounded p-2 text-xs sm:text-sm">
+                      <table className="w-full min-w-[500px]">
+                        <thead>
+                          <tr>
+                            <th className="text-left">Date</th>
+                            <th className="text-left">Name</th>
+                            <th className="text-left">Task</th>
+                            <th className="text-left">Hours</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(works || [])
+                            .slice()
+                            .reverse()
+                            .map((w) => (
+                              <tr key={w._id} className="border-t">
+                                <td className="py-1">{w.date}</td>
+                                <td className="py-1">{w.name || w.userEmail}</td>
+                                <td className="py-1">{w.task}</td>
+                                <td className="py-1">{w.hours}</td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                      <div className="mt-2 text-xs sm:text-sm">
+                        Total hours:{' '}
+                        {(works || []).reduce((s, w) => s + Number(w.hours || 0), 0)}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-  {statModalType === 'Works' && (
-    <div>
-      <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
-        <FaTasks /> All works
-      </h4>
-      <div className="overflow-auto max-h-64 border rounded p-2 text-xs sm:text-sm">
-        <ul className="space-y-2">
-          {(works || [])
-            .slice()
-            .reverse()
-            .map((w) => (
-              <li key={w._id} className="p-2 border rounded">
-                <div className="text-sm font-medium">
-                  {w.task} — {w.name || w.userEmail}
-                </div>
-                <div className="text-xs opacity-70">
-                  Date: {w.date} • Hours: {w.hours}
-                </div>
-              </li>
-            ))}
-        </ul>
-      </div>
-    </div>
-  )}
-</div>
+                {statModalType === 'Works' && (
+                  <div>
+                    <h4 className="font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
+                      <FaTasks /> All works
+                    </h4>
+                    <div className="overflow-auto max-h-64 border rounded p-2 text-xs sm:text-sm">
+                      <ul className="space-y-2">
+                        {(works || [])
+                          .slice()
+                          .reverse()
+                          .map((w) => (
+                            <li key={w._id} className="p-2 border rounded">
+                              <div className="text-sm font-medium">
+                                {w.task} — {w.name || w.userEmail}
+                              </div>
+                              <div className="text-xs opacity-70">
+                                Date: {w.date} • Hours: {w.hours}
+                              </div>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
 
             </div>
           </div>

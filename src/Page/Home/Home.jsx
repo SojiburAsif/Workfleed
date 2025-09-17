@@ -16,7 +16,7 @@ const Home = () => {
 
   return (
     <div className={`${bgClass}  transition-colors duration-500`}>
-    <div className=" mt-20 md:mt-0">  <Banner /></div>
+    <div className=" mt-17 md:mt-0">  <Banner /></div>
       <FeatureSection />
       <SupportCard />
       <ReviewSection />
